@@ -4,6 +4,7 @@ import { api } from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorMessage from '../../components/ErrorMessage';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { STUDENT_BATCH_LIMIT } from '../../data/appConfig';
 
 export default function ReviewPage() {
   const [batch, setBatch] = useState(null);
@@ -39,7 +40,7 @@ export default function ReviewPage() {
 
   const handleSubmit = async () => {
     if (!batch || Number(batch.total_students) < Number(batch.max_students)) {
-      setError('Cannot submit. Please add all 100 students first.');
+      setError(`Cannot submit. Please add all ${STUDENT_BATCH_LIMIT} students first.`);
       return;
     }
 

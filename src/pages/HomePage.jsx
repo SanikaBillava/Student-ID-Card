@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
 import { UserCircle2, Settings2, Users, Lock } from 'lucide-react';
 import { THEME } from '../constants';
+import { STUDENT_BATCH_LIMIT } from '../data/appConfig';
 
 export default function HomePage() {
   const { settings } = useSettings();
@@ -21,7 +22,7 @@ export default function HomePage() {
     {
       icon: Users,
       title: 'Batch Management',
-      description: 'Manage up to 100 students per batch with draft save functionality.'
+      description: `Manage up to ${STUDENT_BATCH_LIMIT} students per batch with draft save functionality.`
     },
     {
       icon: Lock,
@@ -98,7 +99,7 @@ export default function HomePage() {
               <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold">4</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Review & Submit</h3>
-                <p className="text-gray-600">Once 100 students are added, review and submit the batch. Data is locked after submission.</p>
+                <p className="text-gray-600">Once {STUDENT_BATCH_LIMIT} students are added, review and submit the batch. Data is locked after submission.</p>
               </div>
             </div>
           </div>

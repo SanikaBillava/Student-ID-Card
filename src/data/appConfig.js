@@ -1,0 +1,1 @@
+export const STUDENT_BATCH_LIMIT = 1000;

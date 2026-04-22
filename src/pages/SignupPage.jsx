@@ -6,7 +6,7 @@ import ErrorMessage from '../components/ErrorMessage';
 import { UserCircle2 } from 'lucide-react';
 
 export default function SignupPage() {
-  const [formData, setFormData] = useState({ name: '', email: '', mobile: '', password: '', school_logo: '' });
+  const [formData, setFormData] = useState({ school_name: '', contact_person: '', email: '', mobile: '', password: '', school_logo: '' });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -49,8 +49,13 @@ export default function SignupPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2">Name *</label>
-            <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" />
+            <label className="block text-sm font-medium mb-2">School Name *</label>
+            <input type="text" name="school_name" value={formData.school_name} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Contact Person *</label>
+            <input type="text" name="contact_person" value={formData.contact_person} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" />
           </div>
 
           <div>

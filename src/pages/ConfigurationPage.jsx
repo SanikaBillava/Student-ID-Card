@@ -3,14 +3,33 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import ErrorMessage from '../components/ErrorMessage';
 import { Settings2, Plus, X } from 'lucide-react';
+import { STUDENT_BATCH_LIMIT } from '../data/appConfig';
 
 export default function ConfigurationPage() {
   const [fields, setFields] = useState([]);
   const [newField, setNewField] = useState({ name: '', type: 'text', required: true });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [schoolName, setSchoolName] = useState('');
   const navigate = useNavigate();
   const userId = localStorage.getItem('user_token');
+
+  useEffect(() => {
+    const loadUser = async () => {
+      if (!userId) return;
+
+      try {
+        const response = await api.users.getById(userId);
+        if (response.success && response.data) {
+          setSchoolName(response.data.school_name || '');
+        }
+      } catch (err) {
+        console.error('Failed to load user details:', err);
+      }
+    };
+
+    loadUser();
+  }, [userId]);
 
   const fieldTypes = [
     { value: 'text', label: 'Text' },
@@ -46,10 +65,10 @@ export default function ConfigurationPage() {
     try {
       const batchData = {
         user_id: userId,
-        school_name: 'My School',
+        school_name: schoolName,
         status: 'draft',
         total_students: 0,
-        max_students: 100
+        max_students: STUDENT_BATCH_LIMIT
       };
       const batchResponse = await api.batches.create(batchData);
       
