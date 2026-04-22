@@ -1,0 +1,246 @@
+{
+  "databaseSchema": {
+    "tables": {
+      "users": {
+        "fields": {
+          "id": {
+            "type": "UUID",
+            "primaryKey": true,
+            "autoGenerate": true
+          },
+          "name": {
+            "type": "VARCHAR(255)",
+            "required": true
+          },
+          "email": {
+            "type": "VARCHAR(255)",
+            "unique": true,
+            "required": true
+          },
+          "mobile": {
+            "type": "VARCHAR(20)",
+            "required": true
+          },
+          "password": {
+            "type": "VARCHAR(255)",
+            "required": true
+          },
+          "school_logo": {
+            "type": "TEXT",
+            "required": false
+          },
+          "role": {
+            "type": "VARCHAR(50)",
+            "default": "admin"
+          },
+          "created_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          },
+          "updated_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          }
+        },
+        "indexes": [
+          "email"
+        ]
+      },
+      "batches": {
+        "fields": {
+          "id": {
+            "type": "UUID",
+            "primaryKey": true,
+            "autoGenerate": true
+          },
+          "user_id": {
+            "type": "UUID",
+            "foreignKey": "users.id",
+            "required": true
+          },
+          "school_name": {
+            "type": "VARCHAR(255)",
+            "required": true
+          },
+          "school_logo": {
+            "type": "TEXT",
+            "required": false
+          },
+          "status": {
+            "type": "VARCHAR(20)",
+            "enum": [
+              "draft",
+              "locked"
+            ],
+            "default": "draft"
+          },
+          "total_students": {
+            "type": "INTEGER",
+            "default": 0
+          },
+          "max_students": {
+            "type": "INTEGER",
+            "default": 100
+          },
+          "submitted_at": {
+            "type": "TIMESTAMP",
+            "required": false
+          },
+          "created_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          },
+          "updated_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          }
+        },
+        "indexes": [
+          "user_id",
+          "status",
+          "created_at"
+        ]
+      },
+      "field_configurations": {
+        "fields": {
+          "id": {
+            "type": "UUID",
+            "primaryKey": true,
+            "autoGenerate": true
+          },
+          "batch_id": {
+            "type": "UUID",
+            "foreignKey": "batches.id",
+            "required": true
+          },
+          "field_name": {
+            "type": "VARCHAR(100)",
+            "required": true
+          },
+          "field_type": {
+            "type": "VARCHAR(50)",
+            "required": true
+          },
+          "is_required": {
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "display_order": {
+            "type": "INTEGER",
+            "default": 0
+          },
+          "created_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          }
+        },
+        "indexes": [
+          "batch_id",
+          "display_order"
+        ]
+      },
+      "students": {
+        "fields": {
+          "id": {
+            "type": "UUID",
+            "primaryKey": true,
+            "autoGenerate": true
+          },
+          "batch_id": {
+            "type": "UUID",
+            "foreignKey": "batches.id",
+            "required": true
+          },
+          "name": {
+            "type": "VARCHAR(255)",
+            "required": true
+          },
+          "photo": {
+            "type": "TEXT",
+            "required": true
+          },
+          "custom_fields": {
+            "type": "JSONB",
+            "required": false
+          },
+          "created_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          },
+          "updated_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          }
+        },
+        "indexes": [
+          "batch_id",
+          "name",
+          "created_at"
+        ]
+      },
+      "settings": {
+        "fields": {
+          "id": {
+            "type": "UUID",
+            "primaryKey": true,
+            "autoGenerate": true
+          },
+          "site_name": {
+            "type": "VARCHAR(255)",
+            "default": "ID Card Portal"
+          },
+          "site_logo": {
+            "type": "TEXT",
+            "required": false
+          },
+          "contact_phone": {
+            "type": "VARCHAR(20)",
+            "required": false
+          },
+          "contact_email": {
+            "type": "VARCHAR(255)",
+            "required": false
+          },
+          "address": {
+            "type": "TEXT",
+            "required": false
+          },
+          "social_facebook": {
+            "type": "TEXT",
+            "required": false
+          },
+          "social_x": {
+            "type": "TEXT",
+            "required": false
+          },
+          "social_instagram": {
+            "type": "TEXT",
+            "required": false
+          },
+          "social_linkedin": {
+            "type": "TEXT",
+            "required": false
+          },
+          "social_youtube": {
+            "type": "TEXT",
+            "required": false
+          },
+          "updated_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          }
+        },
+        "indexes": []
+      }
+    },
+    "apiResources": [
+      "users",
+      "batches",
+      "field_configurations",
+      "students",
+      "settings"
+    ]
+  },
+  "projectId": "44bb3fb5-2e32-4146-9125-7a766e5254ed",
+  "savedAt": "2026-04-16T18:20:17.772Z"
+}
