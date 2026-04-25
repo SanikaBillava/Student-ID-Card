@@ -60,7 +60,7 @@ export default function SignupPage() {
             navigate("/school-onboarding");
           }
         } else {
-          navigate("/agent-dashboard");
+          navigate("/agent");
         }
       }
     } catch (err) {

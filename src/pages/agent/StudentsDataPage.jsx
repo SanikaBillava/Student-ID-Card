@@ -190,9 +190,6 @@ export default function StudentsDataPage() {
                       Name
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                       Added On
                     </th>
                   </tr>
@@ -215,9 +212,6 @@ export default function StudentsDataPage() {
                       </td>
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
                         {student.name}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {student.email || "-"}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {student.created_at

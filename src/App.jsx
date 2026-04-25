@@ -16,7 +16,6 @@ import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import ConfigurationPage from "./pages/ConfigurationPage";
 import SchoolOnboardingPage from "./pages/SchoolOnboardingPage";
-import AgentDashboard from "./pages/AgentDashboard";
 import SchoolDashboard from "./pages/school/Dashboard";
 import StudentFormPage from "./pages/school/StudentFormPage";
 import ReviewPage from "./pages/school/ReviewPage";
@@ -82,14 +81,6 @@ export default function App() {
                 element={
                   <ProtectedRoute allowedRole="school">
                     <SchoolOnboardingPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/agent-dashboard"
-                element={
-                  <ProtectedRoute allowedRole="agent">
-                    <AgentDashboard />
                   </ProtectedRoute>
                 }
               />
