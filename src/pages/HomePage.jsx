@@ -10,20 +10,20 @@ export default function HomePage() {
 
   const schools = [
     { id: "1", name: "APS", logo: "/schools/APS.jpg" },
-    { id: "2", name: "AUGIC", logo: "/schools/AUGIC.png" },
+    { id: "2", name: "AUGIC", logo: "/schools/AUGIC.jpeg" },
     { id: "3", name: "BIS", logo: "/schools/BIS.jpeg" },
     { id: "4", name: "GDSSA", logo: "/schools/GDSSA.jpg" },
     { id: "5", name: "ITI", logo: "/schools/ITI.jpg" },
-    { id: "6", name: "MCS", logo: "/schools/MCS.png" },
+    { id: "6", name: "MCS", logo: "/schools/MCS.jpeg" },
     { id: "7", name: "MKPSEA", logo: "/schools/MKPSEA.jpg" },
     { id: "8", name: "PMShri", logo: "/schools/PMShri.jpg" },
-    { id: "8", name: "PMShriKumrada", logo: "/schools/PMShri_Kumrada.png" },
-    { id: "8", name: "PNCA", logo: "/schools/PNCA.png" },
-    { id: "8", name: "RIA", logo: "/schools/RIA.jpg" },
-    { id: "8", name: "SVSS", logo: "/schools/SVSS.png" },
-    { id: "8", name: "TPA", logo: "/schools/TPA.jpg" },
-    { id: "8", name: "UGVS", logo: "/schools/UGVS.png" },
-    { id: "8", name: "UJVNL", logo: "/schools/UJVNL.jpg" },
+    { id: "9", name: "PMShriKumrada", logo: "/schools/PMShri_Kumrada.jpeg" },
+    { id: "10", name: "PNCA", logo: "/schools/PNCA.jpeg" },
+    { id: "11", name: "RIA", logo: "/schools/RIA.jpg" },
+    { id: "12", name: "SVSS", logo: "/schools/SVSS.jpeg" },
+    { id: "13", name: "TPA", logo: "/schools/TPA.jpg" },
+    { id: "14", name: "UGVS", logo: "/schools/UGVS.jpeg" },
+    { id: "15", name: "UJVNL", logo: "/schools/UJVNL.jpg" },
   ];
 
   const features = [

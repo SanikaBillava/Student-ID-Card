@@ -13,6 +13,10 @@
             "primaryKey": true,
             "default": "gen_random_uuid()"
           },
+          "name": {
+            "type": "VARCHAR(255)",
+            "required": true
+          },
           "phone": {
             "type": "VARCHAR(15)",
             "unique": true,

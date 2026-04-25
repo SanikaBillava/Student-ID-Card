@@ -8,9 +8,14 @@ export default function Navigation() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { settings } = useSettings();
   const navigate = useNavigate();
-  const isAuthenticated = localStorage.getItem("user_token");
+  const isAuthenticated = localStorage.getItem("userId") || localStorage.getItem("user_token");
+  const role = localStorage.getItem("role");
+  const dashboardPath = role === "agent" ? "/agent-dashboard" : "/school-dashboard";
 
   const handleLogout = () => {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("role");
+    localStorage.removeItem("schoolId");
     localStorage.removeItem("user_token");
     navigate("/login");
   };
@@ -53,7 +58,7 @@ export default function Navigation() {
             {isAuthenticated ? (
               <>
                 <Link
-                  to="/dashboard"
+                  to={dashboardPath}
                   className="text-gray-700 hover:text-primary transition-colors"
                 >
                   Dashboard
@@ -96,7 +101,7 @@ export default function Navigation() {
             {isAuthenticated ? (
               <>
                 <Link
-                  to="/dashboard"
+                  to={dashboardPath}
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
                 >
                   Dashboard

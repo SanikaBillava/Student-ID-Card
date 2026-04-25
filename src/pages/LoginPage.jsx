@@ -5,7 +5,7 @@ import ErrorMessage from '../components/ErrorMessage';
 import { LogIn } from 'lucide-react';
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ phone: '', password: '' });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -20,13 +20,22 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await api.users.getAll({ email: formData.email });
+      const response = await api.users.getAll({ phone: formData.phone });
       if (response.success && response.data?.length > 0) {
-        const user = response.data[0];
+        const user = response.data.find((item) => item.password === formData.password);
+
+        if (!user) {
+          setError('Invalid phone or password');
+          return;
+        }
+
+        const dashboardPath = user.role === 'agent' ? '/agent-dashboard' : '/school-dashboard';
+        localStorage.setItem('userId', user.id);
+        localStorage.setItem('role', user.role === 'agent' ? 'agent' : 'school');
         localStorage.setItem('user_token', user.id);
-        navigate('/dashboard');
+        navigate(dashboardPath);
       } else {
-        setError('Invalid email or password');
+        setError('Invalid phone or password');
       }
     } catch (err) {
       setError(err.message || 'Failed to login');
@@ -47,8 +56,8 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2">Email *</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" />
+            <label className="block text-sm font-medium mb-2">Phone *</label>
+            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" />
           </div>
 
           <div>
