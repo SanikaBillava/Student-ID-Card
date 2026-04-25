@@ -1,37 +1,69 @@
 {
   "databaseSchema": {
+    "enums": {
+      "user_role": ["agent", "school_admin"],
+      "field_type": ["text", "number", "date"]
+    },
     "tables": {
       "users": {
         "fields": {
           "id": {
             "type": "UUID",
             "primaryKey": true,
-            "autoGenerate": true
+            "default": "gen_random_uuid()"
+          },
+          "phone": {
+            "type": "VARCHAR(15)",
+            "unique": true,
+            "required": true
+          },
+          "password": {
+            "type": "TEXT",
+            "required": true
+          },
+          "role": {
+            "type": "user_role",
+            "required": true
+          },
+          "created_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          },
+          "updated_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          }
+        },
+        "indexes": ["phone"]
+      },
+
+      "schools": {
+        "fields": {
+          "id": {
+            "type": "UUID",
+            "primaryKey": true,
+            "default": "gen_random_uuid()"
+          },
+          "agent_id": {
+            "type": "UUID",
+            "foreignKey": "users.id",
+            "required": true
+          },
+          "admin_user_id": {
+            "type": "UUID",
+            "foreignKey": "users.id",
+            "unique": true,
+            "required": true
           },
           "name": {
             "type": "VARCHAR(255)",
             "required": true
           },
-          "email": {
-            "type": "VARCHAR(255)",
-            "unique": true,
-            "required": true
+          "logo_url": {
+            "type": "TEXT"
           },
-          "mobile": {
-            "type": "VARCHAR(20)",
-            "required": true
-          },
-          "password": {
-            "type": "VARCHAR(255)",
-            "required": true
-          },
-          "school_logo": {
-            "type": "TEXT",
-            "required": false
-          },
-          "role": {
-            "type": "VARCHAR(50)",
-            "default": "admin"
+          "address": {
+            "type": "TEXT"
           },
           "created_at": {
             "type": "TIMESTAMP",
@@ -42,49 +74,54 @@
             "default": "CURRENT_TIMESTAMP"
           }
         },
-        "indexes": [
-          "email"
-        ]
+        "indexes": ["agent_id"]
       },
+
       "batches": {
         "fields": {
           "id": {
             "type": "UUID",
             "primaryKey": true,
-            "autoGenerate": true
+            "default": "gen_random_uuid()"
           },
-          "user_id": {
+          "school_id": {
             "type": "UUID",
-            "foreignKey": "users.id",
+            "foreignKey": "schools.id",
             "required": true
           },
-          "school_name": {
+          "year": {
+            "type": "INTEGER",
+            "required": true
+          },
+          "created_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          }
+        },
+        "constraints": {
+          "unique_school_year": ["school_id", "year"]
+        },
+        "indexes": ["school_id"]
+      },
+
+      "students": {
+        "fields": {
+          "id": {
+            "type": "UUID",
+            "primaryKey": true,
+            "default": "gen_random_uuid()"
+          },
+          "batch_id": {
+            "type": "UUID",
+            "foreignKey": "batches.id",
+            "required": true
+          },
+          "name": {
             "type": "VARCHAR(255)",
             "required": true
           },
-          "school_logo": {
-            "type": "TEXT",
-            "required": false
-          },
-          "status": {
-            "type": "VARCHAR(20)",
-            "enum": [
-              "draft",
-              "locked"
-            ],
-            "default": "draft"
-          },
-          "total_students": {
-            "type": "INTEGER",
-            "default": 0
-          },
-          "max_students": {
-            "type": "INTEGER",
-            "default": 100
-          },
-          "submitted_at": {
-            "type": "TIMESTAMP",
-            "required": false
+          "image_url": {
+            "type": "TEXT"
           },
           "created_at": {
             "type": "TIMESTAMP",
@@ -95,22 +132,19 @@
             "default": "CURRENT_TIMESTAMP"
           }
         },
-        "indexes": [
-          "user_id",
-          "status",
-          "created_at"
-        ]
+        "indexes": ["batch_id"]
       },
-      "field_configurations": {
+
+      "student_fields": {
         "fields": {
           "id": {
             "type": "UUID",
             "primaryKey": true,
-            "autoGenerate": true
+            "default": "gen_random_uuid()"
           },
-          "batch_id": {
+          "school_id": {
             "type": "UUID",
-            "foreignKey": "batches.id",
+            "foreignKey": "schools.id",
             "required": true
           },
           "field_name": {
@@ -118,127 +152,63 @@
             "required": true
           },
           "field_type": {
-            "type": "VARCHAR(50)",
+            "type": "field_type",
             "required": true
           },
           "is_required": {
             "type": "BOOLEAN",
-            "default": true
-          },
-          "display_order": {
-            "type": "INTEGER",
-            "default": 0
+            "default": false
           },
           "created_at": {
             "type": "TIMESTAMP",
             "default": "CURRENT_TIMESTAMP"
           }
         },
-        "indexes": [
-          "batch_id",
-          "display_order"
-        ]
+        "constraints": {
+          "unique_field_per_school": ["school_id", "field_name"]
+        },
+        "indexes": ["school_id"]
       },
-      "students": {
+
+      "student_field_values": {
         "fields": {
           "id": {
             "type": "UUID",
             "primaryKey": true,
-            "autoGenerate": true
+            "default": "gen_random_uuid()"
           },
-          "batch_id": {
+          "student_id": {
             "type": "UUID",
-            "foreignKey": "batches.id",
+            "foreignKey": "students.id",
             "required": true
           },
-          "name": {
-            "type": "VARCHAR(255)",
+          "field_id": {
+            "type": "UUID",
+            "foreignKey": "student_fields.id",
             "required": true
           },
-          "photo": {
-            "type": "TEXT",
-            "required": true
-          },
-          "custom_fields": {
-            "type": "JSONB",
-            "required": false
+          "value": {
+            "type": "TEXT"
           },
           "created_at": {
             "type": "TIMESTAMP",
             "default": "CURRENT_TIMESTAMP"
-          },
-          "updated_at": {
-            "type": "TIMESTAMP",
-            "default": "CURRENT_TIMESTAMP"
           }
         },
-        "indexes": [
-          "batch_id",
-          "name",
-          "created_at"
-        ]
-      },
-      "settings": {
-        "fields": {
-          "id": {
-            "type": "UUID",
-            "primaryKey": true,
-            "autoGenerate": true
-          },
-          "site_name": {
-            "type": "VARCHAR(255)",
-            "default": "ID Card Portal"
-          },
-          "site_logo": {
-            "type": "TEXT",
-            "required": false
-          },
-          "contact_phone": {
-            "type": "VARCHAR(20)",
-            "required": false
-          },
-          "contact_email": {
-            "type": "VARCHAR(255)",
-            "required": false
-          },
-          "address": {
-            "type": "TEXT",
-            "required": false
-          },
-          "social_facebook": {
-            "type": "TEXT",
-            "required": false
-          },
-          "social_x": {
-            "type": "TEXT",
-            "required": false
-          },
-          "social_instagram": {
-            "type": "TEXT",
-            "required": false
-          },
-          "social_linkedin": {
-            "type": "TEXT",
-            "required": false
-          },
-          "social_youtube": {
-            "type": "TEXT",
-            "required": false
-          },
-          "updated_at": {
-            "type": "TIMESTAMP",
-            "default": "CURRENT_TIMESTAMP"
-          }
+        "constraints": {
+          "unique_student_field": ["student_id", "field_id"]
         },
-        "indexes": []
+        "indexes": ["student_id", "field_id"]
       }
     },
+
     "apiResources": [
       "users",
+      "schools",
       "batches",
-      "field_configurations",
       "students",
-      "settings"
+      "student_fields",
+      "student_field_values"
     ]
   },
   "projectId": "44bb3fb5-2e32-4146-9125-7a766e5254ed",
