@@ -84,15 +84,7 @@ export default function ReviewPage() {
 
         {error && <ErrorMessage message={error} />}
 
-        {!canSubmit && (
-          <div className="mb-6 p-4 bg-warning/10 border border-warning rounded-lg flex items-start space-x-3">
-            <AlertCircle className="w-6 h-6 text-warning flex-shrink-0 mt-1" />
-            <div>
-              <p className="font-semibold text-warning">Cannot Submit Yet</p>
-              <p className="text-sm text-gray-700">You need to add {batch.max_students - batch.total_students} more students before you can submit this batch.</p>
-            </div>
-          </div>
-        )}
+        
 
         {batch.status === 'locked' && (
           <div className="mb-6 p-4 bg-success/10 border border-success rounded-lg flex items-start space-x-3">
