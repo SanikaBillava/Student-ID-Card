@@ -2,7 +2,8 @@
   "databaseSchema": {
     "enums": {
       "user_role": ["agent", "school_admin"],
-      "field_type": ["text", "number", "date"]
+      "field_type": ["text", "number", "date"],
+      "batch_status": ["draft", "active", "locked"]
     },
     "tables": {
       "users": {
@@ -92,6 +93,16 @@
           "year": {
             "type": "INTEGER",
             "required": true
+          },
+          "max_students": {
+            "type": "INTEGER",
+            "required": true,
+            "default": 1000
+          },
+          "status": {
+            "type": "batch_status",
+            "required": true,
+            "default": "draft"
           },
           "created_at": {
             "type": "TIMESTAMP",
