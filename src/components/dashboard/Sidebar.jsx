@@ -5,34 +5,60 @@ import {
   GraduationCap,
   LayoutDashboard,
   UserPlus,
+  School,
+  Users,
+  BarChart3,
 } from "lucide-react";
 
-export default function SchoolDashSidebar({ onNavigate }) {
+export default function Sidebar({ onNavigate }) {
   const location = useLocation();
+  const role = localStorage.getItem("role");
 
-  const menuItems = [
+  const schoolMenuItems = [
     {
-      path: "/school-dashboard",
+      path: "/school",
       icon: LayoutDashboard,
       label: "Dashboard",
       exact: true,
     },
     {
-      path: "/school-dashboard/students/new",
+      path: "/school/students/new",
       icon: UserPlus,
       label: "Add Student",
     },
     {
-      path: "/school-dashboard/batches/new",
+      path: "/school/batches/new",
       icon: GraduationCap,
       label: "Create Batch",
     },
     {
-      path: "/school-dashboard/review",
+      path: "/school/review",
       icon: CheckCircle,
       label: "Review & Submit",
     },
   ];
+
+  const agentMenuItems = [
+    {
+      path: "/agent",
+      icon: BarChart3,
+      label: "Overview",
+      exact: true,
+    },
+    {
+      path: "/agent/schools",
+      icon: School,
+      label: "All Schools",
+    },
+    {
+      path: "/agent/students",
+      icon: Users,
+      label: "Students Data",
+    },
+  ];
+
+  const menuItems = role === "agent" ? agentMenuItems : schoolMenuItems;
+  const panelTitle = role === "agent" ? "Agent Panel" : "School Panel";
 
   const isActive = (path, exact) => {
     if (exact) return location.pathname === path;
@@ -42,7 +68,7 @@ export default function SchoolDashSidebar({ onNavigate }) {
   return (
     <div className="h-full flex flex-col">
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-900">School Panel</h1>
+        <h1 className="text-xl font-bold text-gray-900">{panelTitle}</h1>
       </div>
 
       <nav className="flex-1 p-4 space-y-1">

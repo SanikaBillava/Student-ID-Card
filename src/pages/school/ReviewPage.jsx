@@ -155,7 +155,7 @@ export default function ReviewPage() {
                       </td>
                       <td className="px-4 py-3">
                         <img
-                          src={student.photo}
+                          src={student.image_url}
                           alt={student.name}
                           className="w-12 h-12 rounded-full object-cover"
                         />

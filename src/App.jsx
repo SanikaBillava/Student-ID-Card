@@ -17,11 +17,14 @@ import LoginPage from "./pages/LoginPage";
 import ConfigurationPage from "./pages/ConfigurationPage";
 import SchoolOnboardingPage from "./pages/SchoolOnboardingPage";
 import AgentDashboard from "./pages/AgentDashboard";
-import SchoolDashboard from "./pages/school-dashboard/Dashboard";
-import StudentFormPage from "./pages/school-dashboard/StudentFormPage";
-import ReviewPage from "./pages/school-dashboard/ReviewPage";
-import CreateBatch from "./pages/school-dashboard/CreateBatch";
-import SchoolDashLayout from "./components/school/SchoolDashLayout";
+import SchoolDashboard from "./pages/school/Dashboard";
+import StudentFormPage from "./pages/school/StudentFormPage";
+import ReviewPage from "./pages/school/ReviewPage";
+import CreateBatch from "./pages/school/CreateBatch";
+import AgentOverviewPage from "./pages/agent/OverviewPage";
+import AgentAllSchoolsPage from "./pages/agent/AllSchoolsPage";
+import AgentStudentsDataPage from "./pages/agent/StudentsDataPage";
+import Layout from "./components/dashboard/Layout";
 
 if (typeof window !== "undefined" && import.meta.env.VITE_PROJECT_ID) {
   if (!window.QOBO_CONFIG) window.QOBO_CONFIG = {};
@@ -39,12 +42,7 @@ function ProtectedRoute({ children, allowedRole }) {
   }
 
   if (allowedRole && role && role !== allowedRole) {
-    return (
-      <Navigate
-        to={role === "agent" ? "/agent-dashboard" : "/school-dashboard"}
-        replace
-      />
-    );
+    return <Navigate to={role === "agent" ? "/agent" : "/school"} replace />;
   }
 
   return children;
@@ -56,12 +54,7 @@ function RoleRedirect() {
   const role = localStorage.getItem("role");
 
   if (!userId) return <Navigate to="/login" replace />;
-  return (
-    <Navigate
-      to={role === "agent" ? "/agent-dashboard" : "/school-dashboard"}
-      replace
-    />
-  );
+  return <Navigate to={role === "agent" ? "/agent" : "/school"} replace />;
 }
 
 export default function App() {
@@ -101,10 +94,10 @@ export default function App() {
                 }
               />
               <Route
-                path="/school-dashboard/*"
+                path="/school*"
                 element={
                   <ProtectedRoute allowedRole="school">
-                    <SchoolDashLayout />
+                    <Layout />
                   </ProtectedRoute>
                 }
               >
@@ -112,6 +105,18 @@ export default function App() {
                 <Route path="students/new" element={<StudentFormPage />} />
                 <Route path="review" element={<ReviewPage />} />
                 <Route path="batches/new" element={<CreateBatch />} />
+              </Route>
+              <Route
+                path="/agent/*"
+                element={
+                  <ProtectedRoute allowedRole="agent">
+                    <Layout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<AgentOverviewPage />} />
+                <Route path="schools" element={<AgentAllSchoolsPage />} />
+                <Route path="students" element={<AgentStudentsDataPage />} />
               </Route>
               <Route path="/dashboard/*" element={<RoleRedirect />} />
             </Routes>

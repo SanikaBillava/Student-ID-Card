@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 
-import SchoolDashSidebar from "./SchoolDashSidebar";
+import SchoolDashSidebar from "./Sidebar";
 import { Menu, X, LogOut } from "lucide-react";
 
-export default function AdminLayout() {
+export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 

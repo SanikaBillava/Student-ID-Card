@@ -8,9 +8,10 @@ export default function Navigation() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { settings } = useSettings();
   const navigate = useNavigate();
-  const isAuthenticated = localStorage.getItem("userId") || localStorage.getItem("user_token");
+  const isAuthenticated =
+    localStorage.getItem("userId") || localStorage.getItem("user_token");
   const role = localStorage.getItem("role");
-  const dashboardPath = role === "agent" ? "/agent-dashboard" : "/school-dashboard";
+  const dashboardPath = role === "agent" ? "/agent" : "/school";
 
   const handleLogout = () => {
     localStorage.removeItem("userId");
