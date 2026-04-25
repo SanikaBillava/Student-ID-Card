@@ -1,8 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useSettings } from '../contexts/SettingsContext';
-import { COMPANY_LOGO, THEME } from '../constants';
-import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { useSettings } from "../contexts/SettingsContext";
+import { COMPANY_LOGO, THEME } from "../constants";
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 
 export default function Footer() {
   const { settings } = useSettings();
@@ -13,10 +13,15 @@ export default function Footer() {
         <div className="grid md:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center space-x-3 mb-4">
-              <img src={settings?.site_logo || COMPANY_LOGO} alt="Logo" className="h-10 w-10" />
-              <span className="text-xl font-bold">{settings?.site_name || 'ID Card Portal'}</span>
+              <img src={COMPANY_LOGO} alt="Logo" className="h-10 w-10" />
+              <span className="text-xl font-bold">
+                {settings?.site_name || "ID Card Portal"}
+              </span>
             </div>
-            <p className="text-gray-400">Professional ID card management system for schools and institutions.</p>
+            <p className="text-gray-400">
+              Professional ID card management system for schools and
+              institutions.
+            </p>
           </div>
 
           <div>
@@ -32,17 +37,32 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
             <div className="flex space-x-4">
               {settings?.social_facebook && (
-                <a href={settings.social_facebook} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                <a
+                  href={settings.social_facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   <Facebook className="w-6 h-6" />
                 </a>
               )}
               {settings?.social_x && (
-                <a href={settings.social_x} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                <a
+                  href={settings.social_x}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   <Twitter className="w-6 h-6" />
                 </a>
               )}
               {settings?.social_instagram && (
-                <a href={settings.social_instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                <a
+                  href={settings.social_instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   <Instagram className="w-6 h-6" />
                 </a>
               )}
