@@ -85,7 +85,7 @@ export default function StudentFormPage() {
       const response = await api.students.create(studentData);
       if (response.success) {
         await api.batches.update(batch.id, { total_students: Number(batch.total_students) + 1 });
-        navigate('/admin');
+        navigate('/dashboard');
       }
     } catch (err) {
       setError(err.message || 'Failed to add student');
@@ -145,7 +145,7 @@ export default function StudentFormPage() {
           ))}
 
           <div className="flex gap-4">
-            <button type="button" onClick={() => navigate('/admin')} className="flex-1 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors">
+            <button type="button" onClick={() => navigate('/dashboard')} className="flex-1 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors">
               Cancel
             </button>
             <button type="submit" disabled={saving} className="flex-1 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primaryDark transition-colors disabled:bg-gray-400">

@@ -24,7 +24,7 @@ export default function LoginPage() {
       if (response.success && response.data?.length > 0) {
         const user = response.data[0];
         localStorage.setItem('user_token', user.id);
-        navigate('/admin');
+        navigate('/dashboard');
       } else {
         setError('Invalid email or password');
       }

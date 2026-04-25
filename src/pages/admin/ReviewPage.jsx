@@ -59,7 +59,7 @@ export default function ReviewPage() {
       const response = await api.batches.update(batch.id, updateData);
       if (response.success) {
         alert('Batch submitted successfully!');
-        navigate('/admin');
+        navigate('/dashboard');
       }
     } catch (err) {
       setError(err.message || 'Failed to submit batch');
@@ -153,7 +153,7 @@ export default function ReviewPage() {
         )}
 
         <div className="flex gap-4">
-          <button onClick={() => navigate('/admin')} className="flex-1 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors">
+          <button onClick={() => navigate('/dashboard')} className="flex-1 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors">
             Back to Dashboard
           </button>
           {canSubmit && (

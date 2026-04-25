@@ -6,9 +6,9 @@ export default function AdminSidebar({ onNavigate }) {
   const location = useLocation();
 
   const menuItems = [
-    { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-    { path: '/admin/students/new', icon: UserPlus, label: 'Add Student' },
-    { path: '/admin/review', icon: CheckCircle, label: 'Review & Submit' }
+    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+    { path: '/dashboard/students/new', icon: UserPlus, label: 'Add Student' },
+    { path: '/dashboard/review', icon: CheckCircle, label: 'Review & Submit' }
   ];
 
   const isActive = (path, exact) => {

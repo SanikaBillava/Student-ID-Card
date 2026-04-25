@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QoboBanner } from '@qobo/banner';
-import { AdminProtectedRoute, initializeAdminAuthFromUrl } from '@qobo/admin-auth';
+
 import { SettingsProvider } from './contexts/SettingsContext';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
@@ -21,7 +21,7 @@ if (typeof window !== 'undefined' && import.meta.env.VITE_PROJECT_ID) {
 
 export default function App() {
   useEffect(() => {
-    initializeAdminAuthFromUrl();
+    // initializeAdminAuthFromUrl();
   }, []);
 
   return (
@@ -36,11 +36,7 @@ export default function App() {
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/configuration" element={<ConfigurationPage />} />
-              <Route path="/admin/*" element={
-                <AdminProtectedRoute>
-                  <AdminLayout />
-                </AdminProtectedRoute>
-              }>
+              <Route path="/dashboard/*" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="students/new" element={<StudentFormPage />} />
                 <Route path="review" element={<ReviewPage />} />

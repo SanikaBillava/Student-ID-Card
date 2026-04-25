@@ -111,11 +111,11 @@ export default function AdminDashboard() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
-        <Link to="/admin/students/new" className="flex-1 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primaryDark transition-colors text-center">
+        <Link to="/dashboard/students/new" className="flex-1 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primaryDark transition-colors text-center">
           Add New Student
         </Link>
         {canSubmit && batch.status === 'draft' && (
-          <Link to="/admin/review" className="flex-1 py-3 bg-success text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center">
+          <Link to="/dashboard/review" className="flex-1 py-3 bg-success text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center">
             Review & Submit
           </Link>
         )}

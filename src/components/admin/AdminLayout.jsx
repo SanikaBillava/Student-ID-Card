@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { clearAdminAuth } from '@qobo/admin-auth';
+
 import AdminSidebar from './AdminSidebar';
 import { Menu, X, LogOut } from 'lucide-react';
 
@@ -10,7 +10,7 @@ export default function AdminLayout() {
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
-      clearAdminAuth();
+      localStorage.removeItem('user_token');
       navigate('/');
     }
   };

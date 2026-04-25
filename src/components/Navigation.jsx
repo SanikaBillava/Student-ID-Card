@@ -32,7 +32,7 @@ export default function Navigation() {
             <Link to="/" className="text-gray-700 hover:text-primary transition-colors">Home</Link>
             {isAuthenticated ? (
               <>
-                <Link to="/admin" className="text-gray-700 hover:text-primary transition-colors">Dashboard</Link>
+                <Link to="/dashboard" className="text-gray-700 hover:text-primary transition-colors">Dashboard</Link>
                 <button onClick={handleLogout} className="flex items-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
@@ -52,7 +52,7 @@ export default function Navigation() {
             <Link to="/" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Home</Link>
             {isAuthenticated ? (
               <>
-                <Link to="/admin" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Dashboard</Link>
+                <Link to="/dashboard" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Dashboard</Link>
                 <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg">Logout</button>
               </>
             ) : (

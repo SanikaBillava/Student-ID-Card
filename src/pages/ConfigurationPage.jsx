@@ -83,7 +83,7 @@ export default function ConfigurationPage() {
             display_order: field.display_order
           });
         }
-        navigate('/admin');
+        navigate('/dashboard');
       }
     } catch (err) {
       setError(err.message || 'Failed to save configuration');
