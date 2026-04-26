@@ -101,8 +101,9 @@ export default function OverviewPage() {
 
   return (
     <div className="space-y-6">
+      {/* Will add later */}
       {/* Invite Link Card */}
-      <div className="bg-white rounded-xl shadow-md p-6">
+      {/* <div className="bg-white rounded-xl shadow-md p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Agent Overview</h1>
@@ -121,7 +122,7 @@ export default function OverviewPage() {
         <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm break-all">
           {inviteLink}
         </div>
-      </div>
+      </div> */}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

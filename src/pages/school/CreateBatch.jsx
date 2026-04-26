@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { api } from "../../lib/api";
 import { useNavigate } from "react-router-dom";
 import ErrorMessage from "../../components/ErrorMessage";
+import { STUDENT_BATCH_LIMIT } from "../../constants";
 
 export default function CreateBatch() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ export default function CreateBatch() {
   const [batchForm, setBatchForm] = useState({
     year: new Date().getFullYear(),
     max_students:
-      localStorage.getItem("defaultBatchLimit") || DEFAULT_BATCH_LIMIT,
+      localStorage.getItem("defaultBatchLimit") || STUDENT_BATCH_LIMIT,
   });
 
   const schoolId = localStorage.getItem("schoolId");
@@ -37,7 +38,7 @@ export default function CreateBatch() {
         // const nextBatches = [response.data, ...batches];
         // setBatches(nextBatches);
         // setSelectedBatchId(response.data.id);
-        navigate("/school-dashboard");
+        navigate("/school");
       }
     } catch (err) {
       console.log(err);
@@ -57,29 +58,35 @@ export default function CreateBatch() {
         </div>
         <form
           onSubmit={handleCreateBatch}
-          className="grid md:grid-cols-[1fr_1fr_auto] gap-4"
+          className="flex flex-col gap-4 max-w-md"
         >
-          <input
-            type="number"
-            name="year"
-            value={batchForm.year}
-            onChange={(e) =>
-              setBatchForm({ ...batchForm, year: e.target.value })
-            }
-            required
-            className="px-4 py-2 border border-gray-300 rounded-lg"
-          />
-          <input
-            type="number"
-            name="max_students"
-            min="1"
-            value={batchForm.max_students}
-            onChange={(e) =>
-              setBatchForm({ ...batchForm, max_students: e.target.value })
-            }
-            required
-            className="px-4 py-2 border border-gray-300 rounded-lg"
-          />
+          <div className="grid grid-cols-2 items-center">
+            <label htmlFor="year">Year</label>
+            <input
+              type="number"
+              name="year"
+              value={batchForm.year}
+              onChange={(e) =>
+                setBatchForm({ ...batchForm, year: e.target.value })
+              }
+              required
+              className="px-4 py-2 border border-gray-300 rounded-lg"
+            />
+          </div>
+          <div className="grid grid-cols-2 items-center">
+            <label htmlFor="max_students">Max students</label>
+            <input
+              type="number"
+              name="max_students"
+              min="1"
+              value={batchForm.max_students}
+              onChange={(e) =>
+                setBatchForm({ ...batchForm, max_students: e.target.value })
+              }
+              required
+              className="px-4 py-2 border border-gray-300 rounded-lg"
+            />
+          </div>
           <button
             type="submit"
             disabled={saving}

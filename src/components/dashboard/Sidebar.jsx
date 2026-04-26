@@ -40,18 +40,21 @@ export default function Sidebar({ onNavigate }) {
 
   const agentMenuItems = [
     {
-      path: "/agent",
+      // path: "/agent",
+      path: "/admin",
       icon: BarChart3,
       label: "Overview",
       exact: true,
     },
     {
-      path: "/agent/schools",
+      // path: "/agent/schools",
+      path: "/admin/schools",
       icon: School,
       label: "All Schools",
     },
     {
-      path: "/agent/students",
+      // path: "/agent/students",
+      path: "/admin/students",
       icon: Users,
       label: "Students Data",
     },

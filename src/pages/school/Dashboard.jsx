@@ -227,7 +227,7 @@ export default function SchoolDashboard() {
           <div className="flex flex-col sm:flex-row gap-4">
             {!batchLocked && (
               <Link
-                to="/school-dashboard/students/new"
+                to="/school/students/new"
                 className="flex-1 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primaryDark transition-colors text-center"
               >
                 Add New Student
@@ -304,7 +304,7 @@ export default function SchoolDashboard() {
               Create your first batch to begin adding students.
             </p>
             <Link
-              to={"/school-dashboard/batches/new"}
+              to={"/school/batches/new"}
               className="w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg hover:bg-primaryDark transition-colors disabled:bg-gray-400"
             >
               Create New Batch

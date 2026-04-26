@@ -4,11 +4,14 @@ import { api } from "../lib/api";
 import FileUpload from "../components/FileUpload";
 import ErrorMessage from "../components/ErrorMessage";
 import { UserCircle2 } from "lucide-react";
+import { AGENT_ID } from "../constants";
 
 export default function SignupPage() {
   const [searchParams] = useSearchParams();
-  const agentId = searchParams.get("agentId");
-  const isSchoolSignup = Boolean(agentId);
+  // const agentId = searchParams.get("agentId");
+  // const isSchoolSignup = Boolean(agentId);
+  const agentId = AGENT_ID; // default agent ID for all school signups
+  const isSchoolSignup = true; // default to school signup for now
   const [formData, setFormData] = useState({
     name: "",
     school_name: "",

@@ -11,7 +11,8 @@ export default function Navigation() {
   const isAuthenticated =
     localStorage.getItem("userId") || localStorage.getItem("user_token");
   const role = localStorage.getItem("role");
-  const dashboardPath = role === "agent" ? "/agent" : "/school";
+  // const dashboardPath = role === "agent" ? "/agent" : "/school";
+  const dashboardPath = role === "agent" ? "/admin" : "/school";
 
   const handleLogout = () => {
     localStorage.removeItem("userId");
@@ -85,6 +86,12 @@ export default function Navigation() {
                   className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryDark transition-colors"
                 >
                   Sign Up
+                </Link>
+                <Link
+                  to="/admin"
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primaryDark transition-colors"
+                >
+                  Admin
                 </Link>
               </>
             )}

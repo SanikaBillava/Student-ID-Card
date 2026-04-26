@@ -104,7 +104,7 @@ export default function SchoolOnboardingPage() {
         });
       }
 
-      navigate("/school-dashboard");
+      navigate("/school");
     } catch (err) {
       setError(err.message || "Failed to save onboarding");
     } finally {

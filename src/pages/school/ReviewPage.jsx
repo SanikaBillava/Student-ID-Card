@@ -4,7 +4,7 @@ import { api } from "../../lib/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ErrorMessage from "../../components/ErrorMessage";
 import { CheckCircle, AlertCircle } from "lucide-react";
-import { STUDENT_BATCH_LIMIT } from "../../data/appConfig";
+import { STUDENT_BATCH_LIMIT } from "../../constants";
 
 export default function ReviewPage() {
   const [batch, setBatch] = useState(null);

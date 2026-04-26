@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useSettings } from "../contexts/SettingsContext";
 import { UserCircle2, Settings2, Users, Lock } from "lucide-react";
 import { THEME } from "../constants";
-import { STUDENT_BATCH_LIMIT } from "../data/appConfig";
+import { STUDENT_BATCH_LIMIT } from "../constants";
 
 export default function HomePage() {
   const { settings } = useSettings();

@@ -24,6 +24,8 @@ import AgentOverviewPage from "./pages/agent/OverviewPage";
 import AgentAllSchoolsPage from "./pages/agent/AllSchoolsPage";
 import AgentStudentsDataPage from "./pages/agent/StudentsDataPage";
 import Layout from "./components/dashboard/Layout";
+import { AdminProtectedRoute } from "@qobo/admin-auth";
+import { AGENT_ID } from "./constants";
 
 if (typeof window !== "undefined" && import.meta.env.VITE_PROJECT_ID) {
   if (!window.QOBO_CONFIG) window.QOBO_CONFIG = {};
@@ -36,12 +38,18 @@ function ProtectedRoute({ children, allowedRole }) {
     localStorage.getItem("userId") || localStorage.getItem("user_token");
   const role = localStorage.getItem("role");
 
+  // for current use
+  if (allowedRole === "agent") {
+    localStorage.setItem("userId", AGENT_ID);
+    localStorage.setItem("role", "agent");
+  }
+
   if (!userId) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   if (allowedRole && role && role !== allowedRole) {
-    return <Navigate to={role === "agent" ? "/agent" : "/school"} replace />;
+    return <Navigate to={role === "agent" ? "/admin" : "/school"} replace />;
   }
 
   return children;
@@ -98,11 +106,13 @@ export default function App() {
                 <Route path="batches/new" element={<CreateBatch />} />
               </Route>
               <Route
-                path="/agent/*"
+                path="/admin/*"
                 element={
+                  // <AdminProtectedRoute>
                   <ProtectedRoute allowedRole="agent">
                     <Layout />
                   </ProtectedRoute>
+                  // </AdminProtectedRoute>
                 }
               >
                 <Route index element={<AgentOverviewPage />} />

@@ -31,7 +31,8 @@ export default function LoginPage() {
           return;
         }
 
-        const dashboardPath = user.role === "agent" ? "/agent" : "/school";
+        // const dashboardPath = user.role === "agent" ? "/agent" : "/school";
+        const dashboardPath = user.role === "agent" ? "/admin" : "/school";
         localStorage.setItem("userId", user.id);
         localStorage.setItem(
           "role",
