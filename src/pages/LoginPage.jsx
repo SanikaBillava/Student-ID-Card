@@ -56,10 +56,10 @@ export default function LoginPage() {
         <div className="flex justify-center mb-6">
           <LogIn className="w-16 h-16 text-primary" />
         </div>
-        <h2 className="text-3xl font-bold text-center mb-8">Login</h2>
-
+        {/* <h2 className="text-3xl font-bold text-center mb-8">Login</h2> */}
+        {/* for now */}
+        <h2 className="text-3xl font-bold text-center mb-8">School Login</h2>
         {error && <ErrorMessage message={error} />}
-
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium mb-2">Phone *</label>
@@ -93,7 +93,6 @@ export default function LoginPage() {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-
         <p className="text-center mt-6 text-gray-600">
           Don't have an account?{" "}
           <Link

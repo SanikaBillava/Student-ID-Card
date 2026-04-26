@@ -58,7 +58,8 @@ export default function StudentsDataPage() {
         setFields(fieldsResponse.data || []);
       }
 
-      // Get all batches for this school (both draft and locked)
+      // Get current year's batch only
+      const currentYear = new Date().getFullYear();
       const batchesResponse = await api.batches.getAll({
         school_id: school.id,
         sortBy: "created_at",
@@ -66,14 +67,11 @@ export default function StudentsDataPage() {
       });
 
       if (batchesResponse.success && batchesResponse.data?.length > 0) {
-        // Get the first available batch (prefer draft, then locked)
-        const draftBatch = batchesResponse.data.find(
-          (b) => b.status !== "locked",
+        // Find current year batch
+        const currentYearBatch = batchesResponse.data.find(
+          (b) => b.year === currentYear,
         );
-        const lockedBatch = batchesResponse.data.find(
-          (b) => b.status === "locked",
-        );
-        setBatch(draftBatch || lockedBatch || null);
+        setBatch(currentYearBatch || null);
       }
     } catch (err) {
       setError(err.message || "Failed to load data");

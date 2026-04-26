@@ -95,7 +95,7 @@ export default function App() {
                 }
               />
               <Route
-                path="/school*"
+                path="/school/*"
                 element={
                   <ProtectedRoute allowedRole="school">
                     <Layout />

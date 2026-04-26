@@ -35,15 +35,26 @@ export default function StudentFormPage() {
       }
 
       const school = schoolResponse.data[0];
+
+      // Get current year's batch only
+      const currentYear = new Date().getFullYear();
       const batchesResponse = await api.batches.getAll({
         school_id: school.id,
         sortBy: "created_at",
         orderBy: "DESC",
       });
-      const draftBatch = (batchesResponse.data || []).find(
-        (item) => item.status !== "locked",
-      );
-      setBatch(draftBatch || null);
+
+      let draftBatch = null;
+      if (batchesResponse.success && batchesResponse.data?.length > 0) {
+        // Find current year batch that is not locked
+        const currentYearBatch = batchesResponse.data.find(
+          (b) => b.year === currentYear,
+        );
+        if (currentYearBatch && currentYearBatch.status !== "locked") {
+          draftBatch = currentYearBatch;
+        }
+      }
+      setBatch(draftBatch);
 
       const fieldsResponse = await api.student_fields.getAll({
         school_id: school.id,

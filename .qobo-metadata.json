@@ -111,6 +111,10 @@
           "created_at": {
             "type": "TIMESTAMP",
             "default": "CURRENT_TIMESTAMP"
+          },
+          "updated_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
           }
         },
         "constraints": {
@@ -206,6 +210,10 @@
             "type": "TEXT"
           },
           "created_at": {
+            "type": "TIMESTAMP",
+            "default": "CURRENT_TIMESTAMP"
+          },
+          "updated_at": {
             "type": "TIMESTAMP",
             "default": "CURRENT_TIMESTAMP"
           }

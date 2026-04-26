@@ -51,28 +51,31 @@ export default function StudentEditPage() {
         setFields(fieldsResponse.data || []);
       }
 
-      // Get batches
+      // Get current year's batch only
+      const currentYear = new Date().getFullYear();
       const batchesResponse = await api.batches.getAll({
         school_id: school.id,
         sortBy: "created_at",
         orderBy: "DESC",
       });
 
+      let draftBatch = null;
       if (batchesResponse.success && batchesResponse.data?.length > 0) {
-        // Get the first draft batch
-        const draftBatch = batchesResponse.data.find(
-          (b) => b.status !== "locked",
+        // Find current year batch that is not locked
+        const currentYearBatch = batchesResponse.data.find(
+          (b) => b.year === currentYear,
         );
-        setBatch(draftBatch || null);
-
-        // Only allow editing for draft batches
-        if (!draftBatch) {
-          setError(
-            "No editable batch found. Only draft batches can be edited.",
-          );
-          setLoading(false);
-          return;
+        if (currentYearBatch && currentYearBatch.status !== "locked") {
+          draftBatch = currentYearBatch;
         }
+      }
+      setBatch(draftBatch);
+
+      // Only allow editing for draft batches
+      if (!draftBatch) {
+        setError("No editable batch found. Only draft batches can be edited.");
+        setLoading(false);
+        return;
       }
 
       // Load student data

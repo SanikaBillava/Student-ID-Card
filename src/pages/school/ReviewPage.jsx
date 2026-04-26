@@ -22,15 +22,40 @@ export default function ReviewPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const batchResponse = await api.batches.getAll({ user_id: userId });
+
+      // Get school info
+      const schoolResponse = await api.schools.getAll({
+        admin_user_id: userId,
+      });
+
+      if (!schoolResponse.success || !schoolResponse.data?.length) {
+        setError("School account was not found");
+        return;
+      }
+
+      const school = schoolResponse.data[0];
+
+      // Get current year's batch only
+      const currentYear = new Date().getFullYear();
+      const batchResponse = await api.batches.getAll({
+        school_id: school.id,
+        sortBy: "created_at",
+        orderBy: "DESC",
+      });
+
       if (batchResponse.success && batchResponse.data?.length > 0) {
-        const currentBatch = batchResponse.data[0];
-        setBatch(currentBatch);
-        const studentsResponse = await api.students.getAll({
-          batch_id: currentBatch.id,
-        });
-        if (studentsResponse.success) {
-          setStudents(studentsResponse.data || []);
+        const currentYearBatch = batchResponse.data.find(
+          (b) => b.year === currentYear,
+        );
+        setBatch(currentYearBatch || null);
+
+        if (currentYearBatch) {
+          const studentsResponse = await api.students.getAll({
+            batch_id: currentYearBatch.id,
+          });
+          if (studentsResponse.success) {
+            setStudents(studentsResponse.data || []);
+          }
         }
       }
     } catch (err) {
