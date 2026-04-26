@@ -27,17 +27,37 @@ export default function AllSchoolsPage() {
   const loadSchools = async () => {
     try {
       setLoading(true);
+
       const response = await api.schools.getAll({
         agent_id: userId,
         page: pagination.page,
         limit: pagination.limit,
       });
 
+      const adminUserIds = response.data.map((s) => s.admin_user_id);
+      const uniqueIds = [...new Set(adminUserIds)];
+
+      const usersResults = await Promise.all(
+        uniqueIds.map((id) => api.users.getById(id)),
+      );
+
+      const userMap = {};
+      usersResults.forEach((res) => {
+        if (res?.data) {
+          userMap[res.data.id] = res.data.phone;
+        }
+      });
+
+      const responseData = response.data.map((school) => ({
+        ...school,
+        phone: userMap[school.admin_user_id] || null,
+      }));
+
       if (response.success) {
-        setSchools(response.data || []);
+        setSchools(responseData);
         setPagination((prev) => ({
           ...prev,
-          total: response.pagination?.total || response.data?.length || 0,
+          total: response.pagination?.total || responseData.length,
           totalPages:
             response.pagination?.totalPages ||
             Math.ceil((response.pagination?.total || 0) / prev.limit),

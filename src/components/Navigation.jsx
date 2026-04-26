@@ -135,6 +135,12 @@ export default function Navigation() {
                 >
                   Sign Up
                 </Link>
+                <Link
+                  to="/admin"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                >
+                  Admin
+                </Link>
               </>
             )}
           </div>
