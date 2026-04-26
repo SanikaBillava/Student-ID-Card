@@ -32,9 +32,9 @@ export default function Sidebar({ onNavigate }) {
       label: "Create Batch",
     },
     {
-      path: "/school/review",
+      path: "/school/students",
       icon: CheckCircle,
-      label: "Review & Submit",
+      label: "All Students",
     },
   ];
 

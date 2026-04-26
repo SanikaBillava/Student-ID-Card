@@ -18,6 +18,8 @@ import ConfigurationPage from "./pages/ConfigurationPage";
 import SchoolOnboardingPage from "./pages/SchoolOnboardingPage";
 import SchoolDashboard from "./pages/school/Dashboard";
 import StudentFormPage from "./pages/school/StudentFormPage";
+import StudentEditPage from "./pages/school/StudentEditPage";
+import StudentsDataPage from "./pages/school/StudentsDataPage";
 import ReviewPage from "./pages/school/ReviewPage";
 import CreateBatch from "./pages/school/CreateBatch";
 import AgentOverviewPage from "./pages/agent/OverviewPage";
@@ -33,16 +35,16 @@ if (typeof window !== "undefined" && import.meta.env.VITE_PROJECT_ID) {
 }
 
 function ProtectedRoute({ children, allowedRole }) {
-  const location = useLocation();
-  const userId =
-    localStorage.getItem("userId") || localStorage.getItem("user_token");
-  const role = localStorage.getItem("role");
-
   // for current use
   if (allowedRole === "agent") {
     localStorage.setItem("userId", AGENT_ID);
     localStorage.setItem("role", "agent");
   }
+
+  const location = useLocation();
+  const userId =
+    localStorage.getItem("userId") || localStorage.getItem("user_token");
+  const role = localStorage.getItem("role");
 
   if (!userId) {
     return <Navigate to="/login" replace state={{ from: location }} />;
@@ -102,6 +104,8 @@ export default function App() {
               >
                 <Route index element={<SchoolDashboard />} />
                 <Route path="students/new" element={<StudentFormPage />} />
+                <Route path="students/:id/edit" element={<StudentEditPage />} />
+                <Route path="students" element={<StudentsDataPage />} />
                 <Route path="review" element={<ReviewPage />} />
                 <Route path="batches/new" element={<CreateBatch />} />
               </Route>

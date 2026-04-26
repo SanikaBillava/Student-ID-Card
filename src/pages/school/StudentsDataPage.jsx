@@ -10,10 +10,7 @@ const DEFAULT_LIMIT = 20;
 
 export default function StudentsDataPage() {
   const navigate = useNavigate();
-  const [schools, setSchools] = useState([]);
-  const [selectedSchoolId, setSelectedSchoolId] = useState("");
-  const [batches, setBatches] = useState([]);
-  const [selectedBatchId, setSelectedBatchId] = useState("");
+  const [batch, setBatch] = useState(null);
   const [students, setStudents] = useState([]);
   const [fields, setFields] = useState([]);
   const [fieldValues, setFieldValues] = useState({});
@@ -30,82 +27,68 @@ export default function StudentsDataPage() {
     localStorage.getItem("userId") || localStorage.getItem("user_token");
 
   useEffect(() => {
-    loadSchools();
+    loadData();
   }, []);
 
   useEffect(() => {
-    if (selectedSchoolId) {
-      loadBatches(selectedSchoolId);
-      loadFields(selectedSchoolId);
-    } else {
-      setBatches([]);
-      setSelectedBatchId("");
-      setStudents([]);
-      setFields([]);
-    }
-  }, [selectedSchoolId]);
-
-  useEffect(() => {
-    if (selectedBatchId) {
+    if (batch) {
       loadStudents();
-    } else {
-      setStudents([]);
     }
-  }, [selectedBatchId, meta.page]);
+  }, [batch, meta.page]);
 
-  const loadSchools = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const response = await api.schools.getAll({ agent_id: userId });
-      if (response.success) {
-        setSchools(response.data || []);
-        if (response.data?.length > 0) {
-          setSelectedSchoolId(response.data[0].id);
-        }
+      // Get school info
+      const schoolResponse = await api.schools.getAll({
+        admin_user_id: userId,
+      });
+      if (!schoolResponse.success || !schoolResponse.data?.length) {
+        setError("School account was not found");
+        return;
+      }
+
+      const school = schoolResponse.data[0];
+
+      // Load custom fields
+      const fieldsResponse = await api.student_fields.getAll({
+        school_id: school.id,
+      });
+      if (fieldsResponse.success) {
+        setFields(fieldsResponse.data || []);
+      }
+
+      // Get all batches for this school (both draft and locked)
+      const batchesResponse = await api.batches.getAll({
+        school_id: school.id,
+        sortBy: "created_at",
+        orderBy: "DESC",
+      });
+
+      if (batchesResponse.success && batchesResponse.data?.length > 0) {
+        // Get the first available batch (prefer draft, then locked)
+        const draftBatch = batchesResponse.data.find(
+          (b) => b.status !== "locked",
+        );
+        const lockedBatch = batchesResponse.data.find(
+          (b) => b.status === "locked",
+        );
+        setBatch(draftBatch || lockedBatch || null);
       }
     } catch (err) {
-      setError(err.message || "Failed to load schools");
+      setError(err.message || "Failed to load data");
     } finally {
       setLoading(false);
     }
   };
 
-  const loadBatches = async (schoolId) => {
-    try {
-      const response = await api.batches.getAll({
-        school_id: schoolId,
-        status: "locked",
-      });
-      if (response.success) {
-        setBatches(response.data || []);
-        if (response.data?.length > 0) {
-          setSelectedBatchId(response.data[0].id);
-        } else {
-          setSelectedBatchId("");
-          setStudents([]);
-        }
-      }
-    } catch (err) {
-      setError(err.message || "Failed to load batches");
-    }
-  };
-
-  const loadFields = async (schoolId) => {
-    try {
-      const response = await api.student_fields.getAll({ school_id: schoolId });
-      if (response.success) {
-        setFields(response.data || []);
-      }
-    } catch (err) {
-      console.error("Failed to load fields:", err);
-    }
-  };
-
   const loadStudents = async () => {
+    if (!batch) return;
+
     try {
       setLoadingStudents(true);
       const response = await api.students.getAll({
-        batch_id: selectedBatchId,
+        batch_id: batch.id,
         page: meta.page,
         limit: meta.limit,
       });
@@ -163,6 +146,10 @@ export default function StudentsDataPage() {
     return fieldValue?.value || "-";
   };
 
+  const handleEditStudent = (studentId) => {
+    navigate(`/school/students/${studentId}/edit`);
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
 
@@ -170,55 +157,22 @@ export default function StudentsDataPage() {
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-md p-6">
         <h1 className="text-2xl font-bold text-gray-900">Students Data</h1>
-        <p className="text-gray-600 mt-1">View students by school and batch.</p>
+        <p className="text-gray-600 mt-1">
+          View all students in your batches.
+          {batch && (
+            <span className="ml-2">
+              (Batch {batch.year} - {batch.status})
+            </span>
+          )}
+        </p>
       </div>
-
-      {/* School Selection */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Select School
-        </label>
-        <select
-          value={selectedSchoolId}
-          onChange={(e) => {
-            setSelectedSchoolId(e.target.value);
-            setMeta((prev) => ({ ...prev, page: 1 }));
-          }}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-        >
-          {schools.map((school) => (
-            <option key={school.id} value={school.id}>
-              {school.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Batch Selection */}
-      {batches.length > 0 && (
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Select Batch
-          </label>
-          <select
-            value={selectedBatchId}
-            onChange={(e) => {
-              setSelectedBatchId(e.target.value);
-              setMeta((prev) => ({ ...prev, page: 1 }));
-            }}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-          >
-            {batches.map((batch) => (
-              <option key={batch.id} value={batch.id}>
-                Batch {batch.year}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
 
       {/* Students Table */}
-      {loadingStudents ? (
+      {!batch ? (
+        <div className="bg-white rounded-xl shadow-md p-8 text-center text-gray-600">
+          No batch found. Create a batch first to add students.
+        </div>
+      ) : loadingStudents ? (
         <LoadingSpinner />
       ) : students.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md p-8 text-center text-gray-600">
@@ -248,6 +202,11 @@ export default function StudentsDataPage() {
                     <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
                       Created At
                     </th>
+                    {batch.status !== "locked" && (
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
+                        Actions
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -282,6 +241,16 @@ export default function StudentsDataPage() {
                           ? new Date(student.created_at).toLocaleDateString()
                           : "-"}
                       </td>
+                      {batch.status !== "locked" && (
+                        <td className="px-4 py-4">
+                          <button
+                            onClick={() => handleEditStudent(student.id)}
+                            className="p-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

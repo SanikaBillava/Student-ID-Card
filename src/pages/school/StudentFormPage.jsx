@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../lib/api";
-import FileUpload from "../../components/FileUpload";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import ErrorMessage from "../../components/ErrorMessage";
-import { UserPlus } from "lucide-react";
+import StudentForm from "../../components/shared/StudentForm";
 
 export default function StudentFormPage() {
   const [batch, setBatch] = useState(null);
@@ -60,8 +58,8 @@ export default function StudentFormPage() {
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (newFormData) => {
+    setFormData(newFormData);
   };
 
   const handleCustomFieldChange = (fieldId, value) => {
@@ -124,8 +122,12 @@ export default function StudentFormPage() {
     }
   };
 
+  const handleCancel = () => {
+    navigate("/school");
+  };
+
   if (loading) return <LoadingSpinner />;
-  if (error && !batch) return <ErrorMessage message={error} />;
+  if (error && !batch) return <div className="text-center p-8">{error}</div>;
   if (!batch)
     return (
       <div className="text-center">
@@ -134,106 +136,18 @@ export default function StudentFormPage() {
     );
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <div className="flex items-center space-x-3 mb-8">
-          <UserPlus className="w-10 h-10 text-primary" />
-          <h2 className="text-3xl font-bold">Add New Student</h2>
-        </div>
-
-        {error && <ErrorMessage message={error} />}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Student Name *
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Student Photo *
-            </label>
-            <FileUpload onUploadSuccess={handlePhotoUpload} accept="image/*" />
-            {formData.image_url && (
-              <div className="mt-4">
-                <img
-                  src={formData.image_url}
-                  alt="Student"
-                  className="w-32 h-32 object-cover rounded-lg"
-                />
-              </div>
-            )}
-          </div>
-
-          {fields.map((field) => (
-            <div key={field.id}>
-              <label className="block text-sm font-medium mb-2">
-                {field.field_name}{" "}
-                {field.is_required && <span className="text-red-600">*</span>}
-              </label>
-              {field.field_type === "text" && (
-                <input
-                  type="text"
-                  value={formData.custom_fields[field.id] || ""}
-                  onChange={(e) =>
-                    handleCustomFieldChange(field.id, e.target.value)
-                  }
-                  required={field.is_required}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              )}
-              {field.field_type === "number" && (
-                <input
-                  type="number"
-                  value={formData.custom_fields[field.id] || ""}
-                  onChange={(e) =>
-                    handleCustomFieldChange(field.id, e.target.value)
-                  }
-                  required={field.is_required}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              )}
-              {field.field_type === "date" && (
-                <input
-                  type="date"
-                  value={formData.custom_fields[field.id] || ""}
-                  onChange={(e) =>
-                    handleCustomFieldChange(field.id, e.target.value)
-                  }
-                  required={field.is_required}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              )}
-            </div>
-          ))}
-
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={() => navigate("/school")}
-              className="flex-1 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex-1 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primaryDark transition-colors disabled:bg-gray-400"
-            >
-              {saving ? "Saving..." : "Add Student"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <StudentForm
+      formData={formData}
+      fields={fields}
+      loading={loading}
+      saving={saving}
+      error={error}
+      isEdit={false}
+      onChange={handleChange}
+      onCustomFieldChange={handleCustomFieldChange}
+      onPhotoUpload={handlePhotoUpload}
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+    />
   );
 }
