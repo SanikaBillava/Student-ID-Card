@@ -54,7 +54,7 @@ export default function SignupPage() {
           const schoolResponse = await api.schools.create({
             agent_id: agentId,
             admin_user_id: user.id,
-            name: formData.name,
+            name: formData.school_name,
             logo_url: formData.logo_url,
           });
 

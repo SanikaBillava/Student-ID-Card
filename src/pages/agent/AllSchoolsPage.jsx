@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ErrorMessage from "../../components/ErrorMessage";
@@ -44,13 +44,17 @@ export default function AllSchoolsPage() {
       const userMap = {};
       usersResults.forEach((res) => {
         if (res?.data) {
-          userMap[res.data.id] = res.data.phone;
+          userMap[res.data.id] = {
+            phone: res.data.phone,
+            contact_person: res.data.name,
+          };
         }
       });
 
       const responseData = response.data.map((school) => ({
         ...school,
-        phone: userMap[school.admin_user_id] || null,
+        phone: userMap[school.admin_user_id]?.phone || null,
+        contact_person: userMap[school.admin_user_id]?.contact_person || null,
       }));
 
       if (response.success) {
@@ -111,6 +115,9 @@ export default function AllSchoolsPage() {
                       Phone
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Contact Person
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                       Created At
                     </th>
                   </tr>
@@ -136,6 +143,9 @@ export default function AllSchoolsPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {school.phone || "-"}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {school.contact_person || "-"}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {school.created_at

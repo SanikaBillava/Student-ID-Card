@@ -3,7 +3,7 @@ export const COMPANY_LOGO = "/logo.png";
 export const CURRENCY = "₹";
 export const IMAGES = { logo: COMPANY_LOGO };
 
-export const AGENT_ID = "5b0fb27b-a454-4ca8-9d14-05034c9666ce";
+export const AGENT_ID = "2bee2ba5-149e-43a1-932a-54f40ed4c6ad";
 export const STUDENT_BATCH_LIMIT = 1000;
 
 export const THEME = {
