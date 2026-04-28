@@ -6,7 +6,10 @@ import StudentForm from "../../components/shared/StudentForm";
 
 export default function StudentFormPage() {
   const [batch, setBatch] = useState(null);
+  const [batches, setBatches] = useState([]);
   const [fields, setFields] = useState([]);
+  const [message, setMessage] = useState(null);
+  const [messageType, setMessageType] = useState(null); // 'success' | 'error'
   const [formData, setFormData] = useState({
     name: "",
     image_url: "",
@@ -36,8 +39,7 @@ export default function StudentFormPage() {
 
       const school = schoolResponse.data[0];
 
-      // Get current year's batch only
-      const currentYear = new Date().getFullYear();
+      // Get all batches and default to the latest editable batch
       const batchesResponse = await api.batches.getAll({
         school_id: school.id,
         sortBy: "created_at",
@@ -46,13 +48,11 @@ export default function StudentFormPage() {
 
       let draftBatch = null;
       if (batchesResponse.success && batchesResponse.data?.length > 0) {
-        // Find current year batch that is not locked
-        const currentYearBatch = batchesResponse.data.find(
-          (b) => b.year === currentYear,
-        );
-        if (currentYearBatch && currentYearBatch.status !== "locked") {
-          draftBatch = currentYearBatch;
-        }
+        setBatches(batchesResponse.data || []);
+        // Select the latest batch that is not locked; fallback to first
+        draftBatch =
+          batchesResponse.data.find((b) => b.status !== "locked") ||
+          batchesResponse.data[0];
       }
       setBatch(draftBatch);
 
@@ -87,7 +87,9 @@ export default function StudentFormPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!batch || batch.status === "locked") {
-      setError("This batch is locked");
+      setMessage("This batch is locked or not selectable");
+      setMessageType("error");
+      setTimeout(() => setMessage(null), 4000);
       return;
     }
     if (!formData.name.trim()) {
@@ -118,16 +120,27 @@ export default function StudentFormPage() {
 
       if (response.success) {
         for (const field of fields) {
+          const value = formData.custom_fields[field.id] || "";
           await api.student_field_values.create({
             student_id: response.data.id,
             field_id: field.id,
-            value: formData.custom_fields[field.id] || "",
+            value: value,
           });
         }
-        navigate("/school");
+        setFormData({ name: "", image_url: "", custom_fields: {} });
+        setError(null);
+        // show temporary success message
+        setSaving(false);
+        const successMsg = "Student added successfully";
+        setMessage(successMsg);
+        setMessageType("success");
+        setTimeout(() => setMessage(null), 4000);
       }
     } catch (err) {
-      setError(err.message || "Failed to add student");
+      const msg = err.message || "Failed to add student";
+      setMessage(msg);
+      setMessageType("error");
+      setTimeout(() => setMessage(null), 4000);
     } finally {
       setSaving(false);
     }
@@ -147,18 +160,60 @@ export default function StudentFormPage() {
     );
 
   return (
-    <StudentForm
-      formData={formData}
-      fields={fields}
-      loading={loading}
-      saving={saving}
-      error={error}
-      isEdit={false}
-      onChange={handleChange}
-      onCustomFieldChange={handleCustomFieldChange}
-      onPhotoUpload={handlePhotoUpload}
-      onSubmit={handleSubmit}
-      onCancel={handleCancel}
-    />
+    <div className="space-y-6">
+      {message && (
+        <div
+          className={`p-4 rounded-md text-sm ${
+            messageType === "success"
+              ? "bg-green-50 text-green-800 border border-green-100"
+              : "bg-red-50 text-red-800 border border-red-100"
+          }`}
+        >
+          {message}
+        </div>
+      )}
+
+      {batches.length > 0 && (
+        <div className="bg-white rounded-xl shadow-md p-4 max-w-3xl mx-auto">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Batch
+          </label>
+          <select
+            value={batch?.id || ""}
+            onChange={(e) => {
+              const sel = batches.find((b) => b.id === e.target.value);
+              setBatch(sel || null);
+            }}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          >
+            {batches.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name} {b.status ? ` - ${b.status}` : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <StudentForm
+        formData={formData}
+        fields={fields}
+        loading={loading}
+        saving={saving}
+        error={error}
+        batchLocked={batch?.status === "locked"}
+        batchLockedMessage={
+          batch?.status === "locked"
+            ? "Selected batch is locked. You cannot add students to a locked batch."
+            : undefined
+        }
+        isEdit={false}
+        onChange={handleChange}
+        onCustomFieldChange={handleCustomFieldChange}
+        onPhotoUpload={handlePhotoUpload}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+      />
+    </div>
   );
 }

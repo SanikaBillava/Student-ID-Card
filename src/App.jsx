@@ -20,7 +20,6 @@ import SchoolDashboard from "./pages/school/Dashboard";
 import StudentFormPage from "./pages/school/StudentFormPage";
 import StudentEditPage from "./pages/school/StudentEditPage";
 import StudentsDataPage from "./pages/school/StudentsDataPage";
-import ReviewPage from "./pages/school/ReviewPage";
 import CreateBatch from "./pages/school/CreateBatch";
 import AgentOverviewPage from "./pages/agent/OverviewPage";
 import AgentAllSchoolsPage from "./pages/agent/AllSchoolsPage";
@@ -106,7 +105,6 @@ export default function App() {
                 <Route path="students/new" element={<StudentFormPage />} />
                 <Route path="students/:id/edit" element={<StudentEditPage />} />
                 <Route path="students" element={<StudentsDataPage />} />
-                <Route path="review" element={<ReviewPage />} />
                 <Route path="batches/new" element={<CreateBatch />} />
               </Route>
               <Route

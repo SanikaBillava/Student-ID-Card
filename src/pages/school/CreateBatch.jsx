@@ -11,10 +11,9 @@ export default function CreateBatch() {
 
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [existingBatch, setExistingBatch] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [batchForm, setBatchForm] = useState({
-    year: new Date().getFullYear(),
+    // name: `Batch ${new Date().getFullYear()}`,
     max_students:
       localStorage.getItem("defaultBatchLimit") || STUDENT_BATCH_LIMIT,
   });
@@ -23,11 +22,12 @@ export default function CreateBatch() {
   const userId =
     localStorage.getItem("userId") || localStorage.getItem("user_token");
 
-  useEffect(() => {
-    checkExistingBatch();
-  }, []);
+  // useEffect(() => {
+  //   checkExistingBatch();
+  // }, []);
 
   const checkExistingBatch = async () => {
+    let existing = null;
     try {
       setLoading(true);
 
@@ -44,8 +44,7 @@ export default function CreateBatch() {
       const school = schoolResponse.data[0];
       localStorage.setItem("schoolId", school.id);
 
-      // Check if batch exists for current year
-      const currentYear = new Date().getFullYear();
+      // Check if a batch with the default name exists
       const batchesResponse = await api.batches.getAll({
         school_id: school.id,
         sortBy: "created_at",
@@ -53,19 +52,17 @@ export default function CreateBatch() {
       });
 
       if (batchesResponse.success && batchesResponse.data?.length > 0) {
-        const currentYearBatch = batchesResponse.data.find(
-          (b) => b.year === currentYear,
-        );
-        setExistingBatch(currentYearBatch || null);
+        existing = batchesResponse.data.find((b) => b.name === batchForm.name);
       }
     } catch (err) {
       setError(err.message || "Failed to check existing batch");
     } finally {
       setLoading(false);
     }
+    return existing;
   };
 
-  const deletePreviousYearData = async (schoolId, currentYear) => {
+  const deleteOldBatches = async (schoolId) => {
     try {
       // Get all batches
       const batchesResponse = await api.batches.getAll({
@@ -73,10 +70,13 @@ export default function CreateBatch() {
       });
 
       if (batchesResponse.success && batchesResponse.data) {
-        // Find previous year batches
-        const previousBatches = batchesResponse.data.filter(
-          (b) => b.year < currentYear,
-        );
+        // Find batches older than 1 year (by created_at)
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        const previousBatches = batchesResponse.data.filter((b) => {
+          const created = b.created_at ? new Date(b.created_at) : null;
+          return created && created < oneYearAgo;
+        });
 
         for (const prevBatch of previousBatches) {
           // Get all students in the batch
@@ -110,34 +110,33 @@ export default function CreateBatch() {
         }
       }
     } catch (err) {
-      console.error("Failed to delete previous year data:", err);
+      console.error("Failed to delete old batches:", err);
       // Continue even if deletion fails
     }
   };
 
   const handleCreateBatch = async (e) => {
     e.preventDefault();
+    setSaving(true);
 
-    // Check if batch already exists for current year
-    if (existingBatch) {
+    const existing = await checkExistingBatch();
+    // Check if batch with same name exists
+    if (existing) {
       setError(
-        `A batch for year ${batchForm.year} already exists. Only one batch is allowed per year.`,
+        `A batch with the name "${batchForm.name}" already exists. Names must be unique.`,
       );
       return;
     }
 
-    setSaving(true);
     setError(null);
 
     try {
-      const currentYear = new Date().getFullYear();
-
-      // Delete previous year data before creating new batch
-      await deletePreviousYearData(schoolId, currentYear);
+      // Delete batches older than 1 year before creating new batch
+      await deleteOldBatches(schoolId);
 
       const response = await api.batches.create({
         school_id: schoolId,
-        year: Number(batchForm.year),
+        name: batchForm.name,
         max_students: Number(batchForm.max_students) || STUDENT_BATCH_LIMIT,
         status: "draft",
       });
@@ -152,35 +151,7 @@ export default function CreateBatch() {
     }
   };
 
-  if (loading) return <LoadingSpinner />;
-
-  // If batch already exists for current year, show message
-  if (existingBatch) {
-    return (
-      <div className="bg-white rounded-xl shadow-md p-8 text-center">
-        <div className="flex items-center justify-center mb-4">
-          <PlusCircle className="w-12 h-12 text-gray-400" />
-        </div>
-        <h2 className="text-2xl font-bold mb-4">Batch Already Exists</h2>
-        <p className="text-gray-600 mb-4">
-          A batch for year {existingBatch.year} already exists. Only one batch
-          is allowed per year.
-        </p>
-        <p className="text-sm text-gray-500 mb-6">
-          Status:{" "}
-          <span className="font-semibold capitalize">
-            {existingBatch.status}
-          </span>
-        </p>
-        <button
-          onClick={() => navigate("/school")}
-          className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primaryDark transition-colors"
-        >
-          Go to Dashboard
-        </button>
-      </div>
-    );
-  }
+  // if (loading) return <LoadingSpinner />;
 
   return (
     <>
@@ -190,25 +161,24 @@ export default function CreateBatch() {
           <PlusCircle className="w-7 h-7 text-primary" />
           <h2 className="text-2xl font-bold">Create Batch</h2>
         </div>
-        <p className="text-sm text-gray-600 mb-4">
-          Creating a new batch will automatically delete all data from previous
-          years.
-        </p>
+        {/* <p className="text-sm text-gray-600 mb-4">
+          Creating a new batch will automatically delete batches older than one
+          year.
+        </p> */}
         <form
           onSubmit={handleCreateBatch}
           className="flex flex-col gap-4 max-w-md"
         >
           <div className="grid grid-cols-2 items-center">
-            <label htmlFor="year">Year</label>
+            <label htmlFor="name">Name</label>
             <input
-              type="number"
-              name="year"
-              value={batchForm.year}
-              // onChange={(e) =>
-              //   setBatchForm({ ...batchForm, year: e.target.value })
-              // }
-
-              readOnly
+              type="text"
+              name="name"
+              placeholder={`Batch ${new Date().getFullYear()}`}
+              value={batchForm.name}
+              onChange={(e) =>
+                setBatchForm({ ...batchForm, name: e.target.value })
+              }
               required
               className="px-4 py-2 border border-gray-300 rounded-lg"
             />

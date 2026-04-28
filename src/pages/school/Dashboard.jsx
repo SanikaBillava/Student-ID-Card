@@ -3,11 +3,14 @@ import { Link } from "react-router-dom";
 import { api } from "../../lib/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ErrorMessage from "../../components/ErrorMessage";
+import StudentsTable from "../../components/shared/StudentsTable";
 import { Users, Clock, School } from "lucide-react";
+import { valueFormatter } from "../../utils";
 
 export default function SchoolDashboard() {
   const [schoolRecord, setSchoolRecord] = useState(null);
   const [batch, setBatch] = useState(null);
+  const [batches, setBatches] = useState([]);
   const [students, setStudents] = useState([]);
   const [fields, setFields] = useState([]);
   const [fieldValues, setFieldValues] = useState({});
@@ -51,7 +54,6 @@ export default function SchoolDashboard() {
       setFields(fieldsResponse.success ? fieldsResponse.data || [] : []);
 
       // Get current year's batch
-      const currentYear = new Date().getFullYear();
       const batchesResponse = await api.batches.getAll({
         school_id: school.id,
         sortBy: "created_at",
@@ -59,11 +61,8 @@ export default function SchoolDashboard() {
       });
 
       if (batchesResponse.success && batchesResponse.data?.length > 0) {
-        // Find current year batch
-        const currentYearBatch = batchesResponse.data.find(
-          (b) => b.year === currentYear,
-        );
-        setBatch(currentYearBatch || null);
+        setBatches(batchesResponse.data || []);
+        setBatch(batchesResponse.data[0] || null);
       }
     } catch (err) {
       setError(err.message || "Failed to load data");
@@ -182,8 +181,26 @@ export default function SchoolDashboard() {
             <p className="text-gray-600">{schoolRecord.name}</p>
           </div>
         </div>
-        {batch && (
-          <div className="text-sm text-gray-600">Batch {batch.year}</div>
+        {batches.length > 0 ? (
+          <div>
+            <label className="text-sm text-gray-600 mr-2">Batch</label>
+            <select
+              value={batch?.id || ""}
+              onChange={(e) => {
+                const sel = batches.find((b) => b.id === e.target.value);
+                setBatch(sel || null);
+              }}
+              className="px-2 py-1 border border-gray-200 rounded-md"
+            >
+              {batches.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <div className="text-sm text-gray-600">No batches</div>
         )}
       </div>
 
@@ -245,78 +262,20 @@ export default function SchoolDashboard() {
           {/* Last 5 Students */}
           <div className="bg-white rounded-xl shadow-md p-6">
             <h2 className="text-2xl font-bold mb-4">Recent Students</h2>
-            {students.length === 0 ? (
-              <p className="text-gray-600">
-                No students added to this batch yet.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold">
-                        Photo
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold">
-                        Name
-                      </th>
-                      {fields.map((field) => (
-                        <th
-                          key={field.id}
-                          className="px-4 py-3 text-left text-sm font-semibold"
-                        >
-                          {field.field_name}
-                        </th>
-                      ))}
-                      <th className="px-4 py-3 text-left text-sm font-semibold">
-                        Added On
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {students.map((student) => (
-                      <tr key={student.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3">
-                          {student.image_url ? (
-                            <img
-                              src={student.image_url}
-                              alt={student.name}
-                              className="w-12 h-12 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                              <Users className="w-6 h-6 text-gray-400" />
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 font-medium text-gray-900">
-                          {student.name}
-                        </td>
-                        {fields.map((field) => (
-                          <td
-                            key={field.id}
-                            className="px-4 py-3 text-sm text-gray-600"
-                          >
-                            {getFieldValue(student.id, field.id)}
-                          </td>
-                        ))}
-                        <td className="px-4 py-3 text-sm text-gray-600">
-                          {student.created_at
-                            ? new Date(student.created_at).toLocaleDateString()
-                            : "-"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <StudentsTable
+              students={students}
+              fields={fields}
+              fieldValues={fieldValues}
+              showActions={false}
+              valueFormatter={valueFormatter}
+              emptyMessage={`No students added to this batch yet.`}
+            />
           </div>
         </>
       ) : (
         <div className="bg-white rounded-xl shadow-md p-8 text-center">
           <p className="text-gray-600 mb-4">
-            No batch found for the current year. Create a batch to get started.
+            No batches found. Create a batch to get started.
           </p>
           <Link
             to="/school/batches/new"

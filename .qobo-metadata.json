@@ -94,8 +94,8 @@
             "foreignKey": "schools.id",
             "required": true
           },
-          "year": {
-            "type": "INTEGER",
+          "name": {
+            "type": "TEXT",
             "required": true
           },
           "max_students": {
@@ -118,7 +118,7 @@
           }
         },
         "constraints": {
-          "unique_school_year": ["school_id", "year"]
+          "unique_school_batch_name": ["school_id", "name"]
         },
         "indexes": ["school_id"]
       },

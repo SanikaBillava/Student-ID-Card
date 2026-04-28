@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import FileUpload from "../../components/FileUpload";
 import ErrorMessage from "../../components/ErrorMessage";
 import { UserPlus, Edit2 } from "lucide-react";
+import DateInput from "./DatePicker";
 
 export default function StudentForm({
   formData,
@@ -16,6 +17,8 @@ export default function StudentForm({
   onPhotoUpload,
   onSubmit,
   onCancel,
+  batchLocked = false,
+  batchLockedMessage = "Selected batch is locked. You cannot add students to a locked batch.",
 }) {
   const navigate = useNavigate();
 
@@ -51,6 +54,11 @@ export default function StudentForm({
         </div>
 
         {error && <ErrorMessage message={error} />}
+        {batchLocked && (
+          <div className="mb-4 p-3 rounded-md bg-yellow-50 text-yellow-800 border border-yellow-100">
+            {batchLockedMessage}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -119,15 +127,11 @@ export default function StudentForm({
                 />
               )}
               {field.field_type === "date" && (
-                <input
-                  type="date"
+                <DateInput
                   value={formData.custom_fields[field.id] || ""}
-                  onChange={(e) =>
-                    handleCustomFieldChange(field.id, e.target.value)
-                  }
+                  onChange={(val) => handleCustomFieldChange(field.id, val)}
                   required={field.is_required}
                   disabled={loading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                 />
               )}
             </div>
@@ -144,7 +148,7 @@ export default function StudentForm({
             </button>
             <button
               type="submit"
-              disabled={saving || loading}
+              disabled={saving || loading || batchLocked}
               className="flex-1 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primaryDark transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {saving ? "Saving..." : isEdit ? "Update Student" : "Add Student"}

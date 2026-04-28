@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../lib/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ErrorMessage from "../../components/ErrorMessage";
-import { Users, Edit, ChevronLeft, ChevronRight } from "lucide-react";
+import StudentsTable from "../../components/shared/StudentsTable";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { valueFormatter } from "../../utils";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -11,6 +13,7 @@ const DEFAULT_LIMIT = 20;
 export default function StudentsDataPage() {
   const navigate = useNavigate();
   const [batch, setBatch] = useState(null);
+  const [batches, setBatches] = useState([]);
   const [students, setStudents] = useState([]);
   const [fields, setFields] = useState([]);
   const [fieldValues, setFieldValues] = useState({});
@@ -23,6 +26,7 @@ export default function StudentsDataPage() {
     total: 0,
     totalPages: 0,
   });
+
   const userId =
     localStorage.getItem("userId") || localStorage.getItem("user_token");
 
@@ -31,15 +35,12 @@ export default function StudentsDataPage() {
   }, []);
 
   useEffect(() => {
-    if (batch) {
-      loadStudents();
-    }
+    if (batch) loadStudents();
   }, [batch, meta.page]);
 
   const loadData = async () => {
     try {
       setLoading(true);
-      // Get school info
       const schoolResponse = await api.schools.getAll({
         admin_user_id: userId,
       });
@@ -50,28 +51,19 @@ export default function StudentsDataPage() {
 
       const school = schoolResponse.data[0];
 
-      // Load custom fields
       const fieldsResponse = await api.student_fields.getAll({
         school_id: school.id,
       });
-      if (fieldsResponse.success) {
-        setFields(fieldsResponse.data || []);
-      }
+      if (fieldsResponse.success) setFields(fieldsResponse.data || []);
 
-      // Get current year's batch only
-      const currentYear = new Date().getFullYear();
       const batchesResponse = await api.batches.getAll({
         school_id: school.id,
         sortBy: "created_at",
         orderBy: "DESC",
       });
-
       if (batchesResponse.success && batchesResponse.data?.length > 0) {
-        // Find current year batch
-        const currentYearBatch = batchesResponse.data.find(
-          (b) => b.year === currentYear,
-        );
-        setBatch(currentYearBatch || null);
+        setBatches(batchesResponse.data || []);
+        setBatch(batchesResponse.data[0] || null);
       }
     } catch (err) {
       setError(err.message || "Failed to load data");
@@ -82,7 +74,6 @@ export default function StudentsDataPage() {
 
   const loadStudents = async () => {
     if (!batch) return;
-
     try {
       setLoadingStudents(true);
       const response = await api.students.getAll({
@@ -101,10 +92,8 @@ export default function StudentsDataPage() {
             Math.ceil((response.meta?.total || 0) / prev.limit),
         }));
 
-        // Load custom field values for all students
-        if (response.data?.length > 0) {
+        if (response.data?.length > 0)
           loadFieldValues(response.data.map((s) => s.id));
-        }
       } else {
         setStudents([]);
       }
@@ -122,9 +111,8 @@ export default function StudentsDataPage() {
         const response = await api.student_field_values.getAll({
           student_id: studentId,
         });
-        if (response.success && response.data) {
+        if (response.success && response.data)
           valuesMap[studentId] = response.data;
-        }
       }
       setFieldValues(valuesMap);
     } catch (err) {
@@ -133,20 +121,12 @@ export default function StudentsDataPage() {
   };
 
   const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= meta.totalPages) {
+    if (newPage >= 1 && newPage <= meta.totalPages)
       setMeta((prev) => ({ ...prev, page: newPage }));
-    }
   };
 
-  const getFieldValue = (studentId, fieldId) => {
-    const values = fieldValues[studentId] || [];
-    const fieldValue = values.find((v) => v.field_id === fieldId);
-    return fieldValue?.value || "-";
-  };
-
-  const handleEditStudent = (studentId) => {
+  const handleEditStudent = (studentId) =>
     navigate(`/school/students/${studentId}/edit`);
-  };
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
@@ -157,15 +137,29 @@ export default function StudentsDataPage() {
         <h1 className="text-2xl font-bold text-gray-900">Students Data</h1>
         <p className="text-gray-600 mt-1">
           View all students in your batches.
-          {batch && (
+          {batches.length > 0 && (
             <span className="ml-2">
-              (Batch {batch.year} - {batch.status})
+              <select
+                value={batch?.id || ""}
+                onChange={(e) => {
+                  const sel = batches.find((b) => b.id === e.target.value);
+                  setBatch(sel || null);
+                }}
+                className="ml-2 px-2 py-1 border border-gray-200 rounded-md"
+              >
+                {batches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+              {" - "}
+              {batch?.status}
             </span>
           )}
         </p>
       </div>
 
-      {/* Students Table */}
       {!batch ? (
         <div className="bg-white rounded-xl shadow-md p-8 text-center text-gray-600">
           No batch found. Create a batch first to add students.
@@ -178,85 +172,16 @@ export default function StudentsDataPage() {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                      Photo
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                      Name
-                    </th>
-                    {fields.map((field) => (
-                      <th
-                        key={field.id}
-                        className="px-4 py-3 text-left text-sm font-semibold text-gray-900"
-                      >
-                        {field.field_name}
-                      </th>
-                    ))}
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                      Created At
-                    </th>
-                    {batch.status !== "locked" && (
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                        Actions
-                      </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {students.map((student) => (
-                    <tr key={student.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-4">
-                        {student.image_url ? (
-                          <img
-                            src={student.image_url}
-                            alt={student.name}
-                            className="w-12 h-12 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                            <Users className="w-6 h-6 text-gray-400" />
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                        {student.name}
-                      </td>
-                      {fields.map((field) => (
-                        <td
-                          key={field.id}
-                          className="px-4 py-4 text-sm text-gray-600"
-                        >
-                          {getFieldValue(student.id, field.id)}
-                        </td>
-                      ))}
-                      <td className="px-4 py-4 text-sm text-gray-600">
-                        {student.created_at
-                          ? new Date(student.created_at).toLocaleDateString()
-                          : "-"}
-                      </td>
-                      {batch.status !== "locked" && (
-                        <td className="px-4 py-4">
-                          <button
-                            onClick={() => handleEditStudent(student.id)}
-                            className="p-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <StudentsTable
+            students={students}
+            fields={fields}
+            fieldValues={fieldValues}
+            showActions={batch.status !== "locked"}
+            onEdit={handleEditStudent}
+            valueFormatter={valueFormatter}
+            emptyMessage={"No students found in this batch."}
+          />
 
-          {/* Pagination */}
           {meta.totalPages > 1 && (
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center justify-between">

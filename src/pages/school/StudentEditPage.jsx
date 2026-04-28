@@ -51,32 +51,16 @@ export default function StudentEditPage() {
         setFields(fieldsResponse.data || []);
       }
 
-      // Get current year's batch only
-      const currentYear = new Date().getFullYear();
+      // Load all batches (we'll determine the student's batch below)
       const batchesResponse = await api.batches.getAll({
         school_id: school.id,
         sortBy: "created_at",
         orderBy: "DESC",
       });
 
-      let draftBatch = null;
-      if (batchesResponse.success && batchesResponse.data?.length > 0) {
-        // Find current year batch that is not locked
-        const currentYearBatch = batchesResponse.data.find(
-          (b) => b.year === currentYear,
-        );
-        if (currentYearBatch && currentYearBatch.status !== "locked") {
-          draftBatch = currentYearBatch;
-        }
-      }
-      setBatch(draftBatch);
-
-      // Only allow editing for draft batches
-      if (!draftBatch) {
-        setError("No editable batch found. Only draft batches can be edited.");
-        setLoading(false);
-        return;
-      }
+      const batchesData = batchesResponse.success
+        ? batchesResponse.data || []
+        : [];
 
       // Load student data
       const studentResponse = await api.students.getById(studentId);
@@ -86,6 +70,19 @@ export default function StudentEditPage() {
       }
 
       const student = studentResponse.data;
+
+      // Determine student's batch from batch_id
+      const studentBatch =
+        batchesData.find((b) => b.id === student.batch_id) || null;
+      setBatch(studentBatch);
+
+      // If the student's batch exists and is locked, block editing for this student
+      if (studentBatch && studentBatch.status === "locked") {
+        setError("This student's batch is locked. Editing is not allowed.");
+        setLoading(false);
+        return;
+      }
+
       setFormData({
         name: student.name || "",
         image_url: student.image_url || "",
@@ -99,6 +96,7 @@ export default function StudentEditPage() {
       if (fieldValuesResponse.success && fieldValuesResponse.data) {
         const customFields = {};
         fieldValuesResponse.data.forEach((fv) => {
+          // store raw value (ISO for dates) for the DateInput component
           customFields[fv.field_id] = fv.value;
         });
         setFormData((prev) => ({
@@ -170,17 +168,18 @@ export default function StudentEditPage() {
               (v) => v.field_id === field.id,
             );
 
+            const value = formData.custom_fields[field.id] || "";
             if (existingValue) {
               // Update existing
               await api.student_field_values.update(existingValue.id, {
-                value: formData.custom_fields[field.id] || "",
+                value: value,
               });
             } else {
               // Create new
               await api.student_field_values.create({
                 student_id: studentId,
                 field_id: field.id,
-                value: formData.custom_fields[field.id] || "",
+                value: value,
               });
             }
           }
