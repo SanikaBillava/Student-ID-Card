@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../lib/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import StudentForm from "../../components/shared/StudentForm";
+import { toast } from "sonner";
 
 export default function StudentFormPage() {
   const [batch, setBatch] = useState(null);
   const [batches, setBatches] = useState([]);
   const [fields, setFields] = useState([]);
-  const [message, setMessage] = useState(null);
-  const [messageType, setMessageType] = useState(null); // 'success' | 'error'
+
   const [formData, setFormData] = useState({
     name: "",
     image_url: "",
@@ -87,9 +87,7 @@ export default function StudentFormPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!batch || batch.status === "locked") {
-      setMessage("This batch is locked or not selectable");
-      setMessageType("error");
-      setTimeout(() => setMessage(null), 4000);
+      toast.error("This batch is locked or not selectable");
       return;
     }
     if (!formData.name.trim()) {
@@ -130,17 +128,11 @@ export default function StudentFormPage() {
         setFormData({ name: "", image_url: "", custom_fields: {} });
         setError(null);
         // show temporary success message
-        setSaving(false);
-        const successMsg = "Student added successfully";
-        setMessage(successMsg);
-        setMessageType("success");
-        setTimeout(() => setMessage(null), 4000);
+        toast.success("Student added successfully");
       }
     } catch (err) {
       const msg = err.message || "Failed to add student";
-      setMessage(msg);
-      setMessageType("error");
-      setTimeout(() => setMessage(null), 4000);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -161,18 +153,6 @@ export default function StudentFormPage() {
 
   return (
     <div className="space-y-6">
-      {message && (
-        <div
-          className={`p-4 rounded-md text-sm ${
-            messageType === "success"
-              ? "bg-green-50 text-green-800 border border-green-100"
-              : "bg-red-50 text-red-800 border border-red-100"
-          }`}
-        >
-          {message}
-        </div>
-      )}
-
       {batches.length > 0 && (
         <div className="bg-white rounded-xl shadow-md p-4 max-w-3xl mx-auto">
           <label className="block text-sm font-medium text-gray-700 mb-2">

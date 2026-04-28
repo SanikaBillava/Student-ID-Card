@@ -7,6 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { QoboBanner } from "@qobo/banner";
+import { Toaster } from "sonner";
 
 import { SettingsProvider } from "./contexts/SettingsContext";
 import Navigation from "./components/Navigation";
@@ -77,6 +78,7 @@ export default function App() {
           apiKey={import.meta.env.VITE_API_KEY}
           apiBaseUrl={import.meta.env.VITE_API_BASE_URL}
         />
+        <Toaster position="top-right" />
         <Navigation />
         <div className="flex flex-col min-h-screen">
           <main className="flex-grow">

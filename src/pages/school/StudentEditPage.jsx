@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ErrorMessage from "../../components/ErrorMessage";
 import StudentForm from "../../components/shared/StudentForm";
+import { toast } from "sonner";
 
 export default function StudentEditPage() {
   const { id: studentId } = useParams();
@@ -185,18 +186,20 @@ export default function StudentEditPage() {
           }
         }
 
-        alert("Student updated successfully!");
-        navigate("/school");
+        toast.success("Student updated successfully!");
+        navigate("/school/students");
       }
     } catch (err) {
-      setError(err.message || "Failed to update student");
+      const msg = err.message || "Failed to update student";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
   };
 
   const handleCancel = () => {
-    navigate("/school");
+    navigate("/school/students");
   };
 
   if (loading) return <LoadingSpinner />;
