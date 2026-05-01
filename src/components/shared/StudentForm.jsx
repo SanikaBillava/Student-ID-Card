@@ -86,7 +86,7 @@ export default function StudentForm({
               disabled={loading}
             />
             {formData.image_url && (
-              <div className="mt-4">
+              <div className="mt-2">
                 <img
                   src={formData.image_url}
                   alt="Student"

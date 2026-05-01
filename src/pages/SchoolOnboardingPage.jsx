@@ -7,7 +7,7 @@ import { Settings2, Plus } from "lucide-react";
 
 const DEFAULT_BATCH_LIMIT = 1000;
 
-// ✅ Predefined fields
+// Predefined fields
 const PREDEFINED_FIELDS = [
   {
     field_name: "Name",
@@ -71,7 +71,7 @@ export default function SchoolOnboardingPage() {
     loadSchool();
   }, [schoolId, userId]);
 
-  // ✅ Toggle field selection
+  // Toggle field selection
   const toggleField = (index) => {
     const updated = [...fields];
     if (updated[index].locked) return;
@@ -80,7 +80,7 @@ export default function SchoolOnboardingPage() {
     setFields(updated);
   };
 
-  // ✅ Add custom field
+  // Add custom field
   const addCustomField = () => {
     if (!newField.field_name.trim()) {
       setError("Field name is required");
@@ -117,7 +117,7 @@ export default function SchoolOnboardingPage() {
         String(batchLimit || DEFAULT_BATCH_LIMIT),
       );
 
-      // ✅ Only selected fields saved
+      // Only selected fields saved
       for (const field of fields.filter(
         (f) =>
           f.selected && f.field_name !== "Name" && f.field_name !== "Photo",

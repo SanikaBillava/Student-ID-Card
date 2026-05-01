@@ -1,12 +1,12 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { api } from '../lib/api';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { api } from "../lib/api";
 
 export const SettingsContext = createContext();
 
 export const useSettings = () => {
   const context = useContext(SettingsContext);
   if (!context) {
-    throw new Error('useSettings must be used within SettingsProvider');
+    throw new Error("useSettings must be used within SettingsProvider");
   }
   return context;
 };
@@ -21,7 +21,7 @@ export function SettingsProvider({ children }) {
       const data = await api.settings.get();
       setSettings(data);
     } catch (error) {
-      console.error('Failed to load settings:', error);
+      console.error("Failed to load settings:", error);
     } finally {
       setLoading(false);
     }

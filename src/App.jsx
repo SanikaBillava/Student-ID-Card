@@ -78,7 +78,7 @@ export default function App() {
           apiKey={import.meta.env.VITE_API_KEY}
           apiBaseUrl={import.meta.env.VITE_API_BASE_URL}
         />
-        <Toaster position="top-right" />
+        <Toaster position="top-right" richColors={true} />
         <Navigation />
         <div className="flex flex-col min-h-screen">
           <main className="flex-grow">
