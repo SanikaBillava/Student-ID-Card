@@ -4,8 +4,10 @@ import { api } from "../../lib/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ErrorMessage from "../../components/ErrorMessage";
 import StudentsTable from "../../components/shared/StudentsTable";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { valueFormatter } from "../../utils";
+import { downloadStudentsExcel } from "../../utils/studentDataExport";
+import { toast } from "sonner";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -21,6 +23,7 @@ export default function StudentsDataPage() {
   const [fieldValues, setFieldValues] = useState({});
   const [loading, setLoading] = useState(true);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [downloadingStudents, setDownloadingStudents] = useState(false);
   const [error, setError] = useState(null);
   const [meta, setMeta] = useState({
     page: DEFAULT_PAGE,
@@ -145,10 +148,26 @@ export default function StudentsDataPage() {
       setMeta((prev) => ({ ...prev, page: newPage }));
   };
 
-  const getFieldValue = (studentId, fieldId) => {
-    const values = fieldValues[studentId] || [];
-    const fieldValue = values.find((v) => v.field_id === fieldId);
-    return fieldValue?.value || "-";
+  const handleDownloadStudents = async () => {
+    const school = schools.find((item) => item.id === selectedSchoolId);
+    const batch = batches.find((item) => item.id === selectedBatchId);
+
+    try {
+      setDownloadingStudents(true);
+      const exportedCount = await downloadStudentsExcel({
+        api,
+        school,
+        batch,
+        fields,
+        valueFormatter,
+        totalStudents: meta.total,
+      });
+      toast.success(`Downloaded ${exportedCount} students`);
+    } catch (err) {
+      toast.error(err.message || "Failed to download students data");
+    } finally {
+      setDownloadingStudents(false);
+    }
   };
 
   if (loading) return <LoadingSpinner />;
@@ -157,8 +176,25 @@ export default function StudentsDataPage() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-md p-6">
-        <h1 className="text-2xl font-bold text-gray-900">Students Data</h1>
-        <p className="text-gray-600 mt-1">View students by school and batch.</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Students Data</h1>
+            <p className="text-gray-600 mt-1">
+              View students by school and batch.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleDownloadStudents}
+            disabled={
+              downloadingStudents || !selectedSchoolId || !selectedBatchId
+            }
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primaryDark disabled:cursor-not-allowed disabled:bg-gray-400"
+          >
+            <Download className="h-4 w-4" />
+            {downloadingStudents ? "Downloading..." : "Download Excel"}
+          </button>
+        </div>
       </div>
 
       {/* School Selection */}
