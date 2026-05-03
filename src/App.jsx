@@ -112,11 +112,11 @@ export default function App() {
               <Route
                 path="/admin/*"
                 element={
-                  // <AdminProtectedRoute>
-                  <ProtectedRoute allowedRole="agent">
-                    <Layout />
-                  </ProtectedRoute>
-                  // </AdminProtectedRoute>
+                  <AdminProtectedRoute>
+                    <ProtectedRoute allowedRole="agent">
+                      <Layout />
+                    </ProtectedRoute>
+                  </AdminProtectedRoute>
                 }
               >
                 <Route index element={<AgentOverviewPage />} />

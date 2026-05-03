@@ -8,7 +8,7 @@ if (!API_KEY) {
   );
 }
 
-async function apiRequest(endpoint, options = {}) {
+async function apiRequest(endpoint, options = {}, isJson = true) {
   const url = `${API_BASE_URL}${endpoint}`;
   const isFormData = options.body instanceof FormData;
   const headers = {
@@ -33,6 +33,9 @@ async function apiRequest(endpoint, options = {}) {
     throw error;
   }
 
+  if (!isJson) {
+    return response;
+  }
   return response.json();
 }
 
@@ -179,6 +182,17 @@ export const api = {
       method: "POST",
       body: formData,
     });
+  },
+
+  getImageBlob: async (imageUrl) => {
+    const response = await apiRequest(
+      `/proxy-image?url=${encodeURIComponent(imageUrl)}`,
+      {
+        method: "GET",
+      },
+      false,
+    );
+    return await response.blob();
   },
 
   getStorageInfo: async () => await apiRequest("/api/v1/storage"),

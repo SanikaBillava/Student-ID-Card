@@ -1,4 +1,5 @@
 import ExcelJS from "exceljs";
+import { api } from "../lib/api";
 
 const EXPORT_PAGE_SIZE = 500;
 const IMAGE_CONCURRENCY = 6;
@@ -127,13 +128,15 @@ const resolveImageUrl = (imageUrl) => {
 };
 
 const fetchImageBlob = async (imageUrl, options = {}) => {
-  const response = await fetch(imageUrl, options);
-  if (!response.ok) return null;
+  try {
+    const response = await api.getImageBlob(imageUrl);
 
-  return {
-    blob: await response.blob(),
-    contentType: response.headers.get("Content-Type"),
-  };
+    return {
+      blob: response,
+    };
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const blobToBase64 = (blob) =>
@@ -160,7 +163,7 @@ const fetchStudentImage = async ({ imageUrl }) => {
       if (!result?.blob) continue;
 
       const extension =
-        getExcelImageExtension(result.blob.type || result.contentType) ||
+        getExcelImageExtension(result.blob.type) ||
         getExcelImageExtensionFromUrl(resolvedImageUrl);
 
       if (!extension) return null;
@@ -200,9 +203,9 @@ const buildColumns = (fields) => [
   ...fields.map((field) => ({
     header: field.field_name,
     key: `field_${field.id}`,
-    width: /father|mother|guardian|parent|name/i.test(field.field_name)
+    width: /father|mother|guardian|parent|name|address/i.test(field.field_name)
       ? 32
-      : 18,
+      : 12,
   })),
   // { header: "Created At", key: "createdAt", width: 16 },
 ];
