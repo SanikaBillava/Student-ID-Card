@@ -94,6 +94,7 @@ export default function AllSchoolsPage() {
     try {
       setDeletingSchoolId(school.id);
       await api.schools.delete(school.id);
+      await api.users.delete(school.admin_user_id);
       toast.success("School deleted successfully");
 
       if (schools.length === 1 && pagination.page > 1) {

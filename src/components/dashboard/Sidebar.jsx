@@ -8,6 +8,7 @@ import {
   School,
   Users,
   BarChart3,
+  Settings,
 } from "lucide-react";
 
 export default function Sidebar({ onNavigate }) {
@@ -35,6 +36,11 @@ export default function Sidebar({ onNavigate }) {
       path: "/school/students",
       icon: CheckCircle,
       label: "All Students",
+    },
+    {
+      path: "/school/setting",
+      icon: Settings,
+      label: "Setting",
     },
   ];
 
