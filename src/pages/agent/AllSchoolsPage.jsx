@@ -1,8 +1,9 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ErrorMessage from "../../components/ErrorMessage";
-import { School } from "lucide-react";
+import { School, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -11,6 +12,7 @@ export default function AllSchoolsPage() {
   const [schools, setSchools] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deletingSchoolId, setDeletingSchoolId] = useState(null);
   const [pagination, setPagination] = useState({
     page: DEFAULT_PAGE,
     limit: DEFAULT_LIMIT,
@@ -82,6 +84,30 @@ export default function AllSchoolsPage() {
     }
   };
 
+  const handleDeleteSchool = async (school) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${school.name}? This action cannot be undone.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingSchoolId(school.id);
+      await api.schools.delete(school.id);
+      toast.success("School deleted successfully");
+
+      if (schools.length === 1 && pagination.page > 1) {
+        setPagination((prev) => ({ ...prev, page: prev.page - 1 }));
+      } else {
+        await loadSchools();
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to delete school");
+    } finally {
+      setDeletingSchoolId(null);
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
 
@@ -120,6 +146,9 @@ export default function AllSchoolsPage() {
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                       Created At
                     </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -151,6 +180,19 @@ export default function AllSchoolsPage() {
                         {school.created_at
                           ? new Date(school.created_at).toLocaleDateString()
                           : "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSchool(school)}
+                          disabled={deletingSchoolId === school.id}
+                          className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          {deletingSchoolId === school.id
+                            ? "Deleting..."
+                            : "Delete"}
+                        </button>
                       </td>
                     </tr>
                   ))}
