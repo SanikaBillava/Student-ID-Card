@@ -6,7 +6,7 @@ import ErrorMessage from "../../components/ErrorMessage";
 import StudentsTable from "../../components/shared/StudentsTable";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { valueFormatter } from "../../utils";
-import { downloadStudentsExcel } from "../../utils/studentDataExport";
+import { downloadStudentsZip } from "../../utils/studentDataExport";
 import { toast } from "sonner";
 
 const DEFAULT_PAGE = 1;
@@ -154,7 +154,7 @@ export default function StudentsDataPage() {
 
     try {
       setDownloadingStudents(true);
-      const exportedCount = await downloadStudentsExcel({
+      const exportedCount = await downloadStudentsZip({
         api,
         school,
         batch,
@@ -192,7 +192,7 @@ export default function StudentsDataPage() {
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primaryDark disabled:cursor-not-allowed disabled:bg-gray-400"
           >
             <Download className="h-4 w-4" />
-            {downloadingStudents ? "Downloading..." : "Download Excel"}
+            {downloadingStudents ? "Downloading..." : "Download ZIP"}
           </button>
         </div>
       </div>

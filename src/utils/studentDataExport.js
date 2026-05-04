@@ -1,12 +1,9 @@
 import ExcelJS from "exceljs";
-import { api } from "../lib/api";
+import JSZip from "jszip";
 
 const EXPORT_PAGE_SIZE = 500;
 const IMAGE_CONCURRENCY = 6;
 const FIELD_VALUE_CONCURRENCY = 10;
-const PHOTO_COLUMN_WIDTH = 16;
-const PHOTO_ROW_HEIGHT = 76;
-const PHOTO_SIZE = 86;
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://api.qobo.dev";
 const API_KEY = import.meta.env.VITE_API_KEY;
@@ -92,30 +89,34 @@ const fetchFieldValuesByStudent = async ({ api, students }) => {
   return fieldValues;
 };
 
-const getExcelImageExtension = (mimeType) => {
+const getImageExtension = (mimeType) => {
   const normalizedMimeType = (mimeType || "").toLowerCase().split(";")[0];
 
   switch (normalizedMimeType) {
     case "image/png":
       return "png";
+    case "image/webp":
+      return "webp";
     case "image/gif":
       return "gif";
     case "image/jpeg":
     case "image/jpg":
-      return "jpeg";
+      return "jpg";
     default:
       return null;
   }
 };
 
-const getExcelImageExtensionFromUrl = (imageUrl) => {
+const getImageExtensionFromUrl = (imageUrl) => {
   const pathname = imageUrl.split("?")[0].toLowerCase();
   const match = pathname.match(/\.([a-z0-9]+)$/);
   const extension = match?.[1];
 
-  if (extension === "png" || extension === "gif") return extension;
-  if (extension === "jpg" || extension === "jpeg") return "jpeg";
-  return null;
+  if (["jpg", "jpeg", "png", "webp", "gif"].includes(extension)) {
+    return extension === "jpeg" ? "jpg" : extension;
+  }
+
+  return "jpg";
 };
 
 const resolveImageUrl = (imageUrl) => {
@@ -127,50 +128,50 @@ const resolveImageUrl = (imageUrl) => {
   }
 };
 
-const fetchImageBlob = async (imageUrl, options = {}) => {
-  try {
-    const response = await api.getImageBlob(imageUrl);
+const getImageFetchAttempts = (imageUrl) => {
+  const resolvedImageUrl = resolveImageUrl(imageUrl);
+  const proxyUrl = `${API_BASE_URL}/proxy-image?url=${encodeURIComponent(
+    resolvedImageUrl,
+  )}`;
+  const apiHeaders = API_KEY ? { "X-API-Key": API_KEY } : undefined;
 
-    return {
-      blob: response,
-    };
-  } catch (error) {
-    console.log(error);
-  }
+  return [
+    apiHeaders ? { url: proxyUrl, options: { headers: apiHeaders } } : null,
+    { url: proxyUrl },
+    { url: resolvedImageUrl },
+    apiHeaders
+      ? { url: resolvedImageUrl, options: { headers: apiHeaders } }
+      : null,
+  ].filter(Boolean);
 };
 
-const blobToBase64 = (blob) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
+const fetchImageBlob = async ({ url, options = {} }) => {
+  const response = await fetch(url, options);
+  if (!response.ok) return null;
 
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
+  return {
+    blob: await response.blob(),
+    contentType: response.headers.get("Content-Type"),
+  };
+};
 
-const fetchStudentImage = async ({ imageUrl }) => {
+const fetchStudentImage = async ({ imageUrl, serialNumber }) => {
   if (!imageUrl) return null;
 
   const resolvedImageUrl = resolveImageUrl(imageUrl);
-  const fetchAttempts = [
-    {},
-    API_KEY ? { headers: { "X-API-Key": API_KEY } } : null,
-  ].filter(Boolean);
 
-  for (const options of fetchAttempts) {
+  for (const attempt of getImageFetchAttempts(imageUrl)) {
     try {
-      const result = await fetchImageBlob(resolvedImageUrl, options);
+      const result = await fetchImageBlob(attempt);
       if (!result?.blob) continue;
 
       const extension =
-        getExcelImageExtension(result.blob.type) ||
-        getExcelImageExtensionFromUrl(resolvedImageUrl);
-
-      if (!extension) return null;
+        getImageExtension(result.blob.type || result.contentType) ||
+        getImageExtensionFromUrl(resolvedImageUrl);
 
       return {
-        base64: await blobToBase64(result.blob),
-        extension,
+        blob: result.blob,
+        filename: `images/${serialNumber}.${extension}`,
       };
     } catch (err) {
       console.error("Failed image fetch attempt:", err);
@@ -183,31 +184,34 @@ const fetchStudentImage = async ({ imageUrl }) => {
 const fetchStudentImages = async (students) => {
   const imageResults = {};
 
-  await runWithConcurrency(students, IMAGE_CONCURRENCY, async (student) => {
-    const imageFile = await fetchStudentImage({
-      imageUrl: student.image_url,
-    });
+  await runWithConcurrency(
+    students,
+    IMAGE_CONCURRENCY,
+    async (student, index) => {
+      const serialNumber = index + 1;
+      const imageFile = await fetchStudentImage({
+        imageUrl: student.image_url,
+        serialNumber,
+      });
 
-    if (imageFile) imageResults[student.id] = imageFile;
-  });
+      if (imageFile) imageResults[student.id] = imageFile;
+    },
+  );
 
   return imageResults;
 };
 
 const buildColumns = (fields) => [
   { header: "#", key: "serialNumber", width: 6 },
-  { header: "Photo", key: "photo", width: PHOTO_COLUMN_WIDTH },
   { header: "Name", key: "name", width: 32 },
-  // { header: "Student ID", key: "studentId", width: 18 },
-  // { header: "Image URL", key: "imageUrl", width: 12 },
   ...fields.map((field) => ({
     header: field.field_name,
     key: `field_${field.id}`,
     width: /father|mother|guardian|parent|name|address/i.test(field.field_name)
       ? 32
-      : 12,
+      : 14,
   })),
-  // { header: "Created At", key: "createdAt", width: 16 },
+  { header: "Photo Filename", key: "photoFilename", width: 20 },
 ];
 
 const buildStudentRow = ({
@@ -215,17 +219,14 @@ const buildStudentRow = ({
   index,
   fields,
   fieldValues,
+  imageFiles,
   valueFormatter,
 }) => {
+  const imageFile = imageFiles[student.id];
   const row = {
     serialNumber: index + 1,
-    photo: "",
+    photoFilename: imageFile?.filename || "",
     name: student.name || "",
-    // studentId: student.id || "",
-    // imageUrl: student.image_url || "",
-    // createdAt: student.created_at
-    //   ? new Date(student.created_at).toLocaleDateString("en-IN")
-    //   : "",
   };
 
   fields.forEach((field) => {
@@ -271,30 +272,8 @@ const fitColumnWidths = (worksheet, columns) => {
 
     excelColumn.width = Math.min(
       Math.max(column.width || 12, maxLength + 3),
-      column.key === "imageUrl" ? 60 : 40,
+      42,
     );
-  });
-
-  worksheet.getColumn("photo").width = PHOTO_COLUMN_WIDTH;
-};
-
-const addStudentImages = ({ workbook, worksheet, students, imageFiles }) => {
-  students.forEach((student, index) => {
-    const imageFile = imageFiles[student.id];
-    if (!imageFile) return;
-
-    const rowNumber = index + 2;
-    const imageId = workbook.addImage({
-      base64: imageFile.base64,
-      extension: imageFile.extension,
-    });
-
-    worksheet.getRow(rowNumber).height = PHOTO_ROW_HEIGHT;
-    worksheet.addImage(imageId, {
-      tl: { col: 1.15, row: rowNumber - 0.92 },
-      ext: { width: PHOTO_SIZE, height: PHOTO_SIZE },
-      editAs: "oneCell",
-    });
   });
 };
 
@@ -318,17 +297,17 @@ const buildWorkbookFile = async ({
         index,
         fields,
         fieldValues,
+        imageFiles,
         valueFormatter,
       }),
     );
 
-    row.height = imageFiles[student.id] ? PHOTO_ROW_HEIGHT : 24;
+    row.height = 24;
     row.eachCell((cell) => {
       cell.alignment = { vertical: "middle", wrapText: true };
     });
   });
 
-  addStudentImages({ workbook, worksheet, students, imageFiles });
   fitColumnWidths(worksheet, columns);
 
   return workbook.xlsx.writeBuffer();
@@ -346,7 +325,7 @@ const downloadBlob = ({ blob, filename }) => {
   URL.revokeObjectURL(url);
 };
 
-export const downloadStudentsExcel = async ({
+export const downloadStudentsZip = async ({
   api,
   school,
   batch,
@@ -378,12 +357,19 @@ export const downloadStudentsExcel = async ({
     imageFiles,
     valueFormatter,
   });
+  const zip = new JSZip();
+
+  zip.file("students.xlsx", workbookFile);
+
+  Object.values(imageFiles).forEach((imageFile) => {
+    zip.file(imageFile.filename, imageFile.blob);
+  });
+
+  const zipBlob = await zip.generateAsync({ type: "blob" });
 
   downloadBlob({
-    blob: new Blob([workbookFile], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    }),
-    filename: `${slugify(school.name)}-${slugify(batch.name)}-students.xlsx`,
+    blob: zipBlob,
+    filename: `${slugify(school.name)}-${slugify(batch.name)}-students.zip`,
   });
 
   return students.length;
